@@ -11,7 +11,7 @@ export default function Header({ onSearch }: SearchbarProps) {
         <header className="header">
             <div className="main-menu">
                 <h1>
-                    <Link href="/" className="button logo link-button">
+                    <Link href="/" className="button logo">
                         <span className="mobile-short-label">TGC</span>
                         <span className="desktop-long-label">THE GOOD CORNER</span>
                     </Link>
