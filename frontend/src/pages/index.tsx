@@ -1,14 +1,11 @@
-import { useState } from 'react';
-
+import { useState } from "react";
 // Components
-import Header from "@/components/Header";
 import RecentAds from "@/components/RecentAds";
 
 // Helpers
 import { ads } from '@/helpers/ads';
-
-// Interfaces
 import { Ad } from "@/interfaces/ads";
+import Layout from "@/layouts/Layout";
 
 export default function Home() {
   const [filteredAds, setFilteredAds] = useState<Ad[]>(ads);
@@ -21,11 +18,10 @@ export default function Home() {
   };
 
   return (
-    <body>
-      <main className="main-content">
-        <Header onSearch={handleSearch} />
+    <Layout onSearch={handleSearch}>
+      <body>
         <RecentAds ads={filteredAds} />
-      </main>
-    </body>
+      </body>
+    </Layout>
   );
 }

@@ -31,5 +31,5 @@ export default function Header({ onSearch }: SearchbarProps) {
                 ))}
             </nav>
         </header>
-    )
+    );
 };
