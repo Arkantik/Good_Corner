@@ -12,13 +12,6 @@ export default function NewAd() {
   const [categories, setCategories] = useState<Category[]>([]);
   const router = useRouter();
 
-  useEffect(() => {
-    axios
-      .get("http://localhost:4000/categories")
-      .then((res) => setCategories(res.data))
-      .catch(console.error);
-  }, []);
-
   const handleSubmit = (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     const form = e.target as HTMLFormElement;
@@ -30,23 +23,34 @@ export default function NewAd() {
       .post("http://localhost:4000/ads", formJSON)
       .then((res) => {
         console.log("annonce créée :", res.data);
-        // router.push("/");
-        alert("ok");
+        router.push("/");
         form.reset();
       })
       .catch(console.error);
   };
 
+  const fetchCategories = () => {
+    axios
+      .get("http://localhost:4000/categories")
+      .then((res) => setCategories(res.data))
+      .catch(console.error);
+  }
+
+  useEffect(() => {
+    fetchCategories();
+  }, []);
+
   return (
     <Layout pageTitle="Creation d'une annonce">
+      <h1>Creation d&apos;une annonce</h1>
       <form onSubmit={handleSubmit}>
         <label htmlFor="title">
-          Titre de l'annonce
+          Titre de l&apos;annonce
           <input type="text" name="title" id="title" />
         </label>
 
         <label htmlFor="picture">
-          Image de l'annonce
+          Image de l&apos;annonce
           <input type="url" name="picture" id="picture" />
         </label>
 
@@ -84,8 +88,6 @@ export default function NewAd() {
             ))}
           </select>
         </label>
-
-        <input type="reset" value="Reset" />
 
         <button>Envoyer</button>
       </form>
