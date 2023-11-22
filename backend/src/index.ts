@@ -1,5 +1,6 @@
 import "reflect-metadata";
 import express, { Request, Response } from "express";
+import cors from "cors";
 import { validate } from "class-validator";
 import { In, Like } from "typeorm";
 import db from "./db";
@@ -10,9 +11,10 @@ import Category from "./entities/Category";
 import Tag from "./entities/Tag";
 
 const app = express();
+app.use(cors());
 app.use(express.json());
 
-const port = 3000;
+const port = 4000;
 
 app.get("/", (req, res) => {
   res.send("Hello World!");
