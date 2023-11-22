@@ -27,7 +27,7 @@ export default function Header({ onSearch }: SearchbarProps) {
         {categories.map((category, index) => (
           <React.Fragment key={category.id}>
             <a href={category.link} className="category-navigation-link">{category.title}</a>
-            {index < categories.length - 1 && '•'}
+            {index < categories.length - 1 && ' • '}
           </React.Fragment>
         ))}
       </nav>
