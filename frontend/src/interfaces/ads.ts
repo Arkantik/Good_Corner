@@ -7,5 +7,5 @@ export interface Ad {
 }
 
 export interface RecentAdsProps {
-  ads?: Ad[];
+  filteredAds: Ad[];
 }
