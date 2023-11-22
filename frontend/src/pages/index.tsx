@@ -1,14 +1,11 @@
-import { useState } from "react";
-// Components
 import RecentAds from "@/components/RecentAds";
-
-// Helpers
-import { ads } from '@/helpers/ads';
-import { Ad } from "@/interfaces/ads";
+import { Ad, RecentAdsProps } from "@/interfaces/ads";
 import Layout from "@/layouts/Layout";
 
+import { useState } from "react";
+
 export default function Home() {
-  const [filteredAds, setFilteredAds] = useState<Ad[]>(ads);
+  const [filteredAds, setFilteredAds] = useState<Ad[]>();
 
   const handleSearch = (query: string) => {
     const filtered = ads.filter(ad =>
@@ -18,10 +15,8 @@ export default function Home() {
   };
 
   return (
-    <Layout onSearch={handleSearch}>
-      <body>
-        <RecentAds ads={filteredAds} />
-      </body>
+    <Layout pageTitle="Acceuil" onSearch={handleSearch}>
+      <RecentAds ads={filteredAds} />
     </Layout>
   );
 }

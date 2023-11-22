@@ -3,6 +3,7 @@ import {
   Entity,
   PrimaryGeneratedColumn,
   Column,
+  OneToMany,
   ManyToMany,
 } from "typeorm";
 import Ad from "./Ad";

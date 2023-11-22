@@ -1,5 +1,5 @@
 {
-  "name": "good-corner-backend",
+  "name": "the-good-corner-nov23",
   "version": "0.0.1",
   "description": "",
   "main": "index.ts",
@@ -7,7 +7,10 @@
     "start": "ts-node-dev ./src/index.ts",
     "resetDB": "ts-node-dev src/resetDb.ts"
   },
-  "author": "Jeremy Dohin",
+  "keywords": [
+    "ads"
+  ],
+  "author": "Pierre Genthon",
   "license": "ISC",
   "dependencies": {
     "class-validator": "^0.14.0",

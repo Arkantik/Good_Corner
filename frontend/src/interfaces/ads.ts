@@ -1,5 +1,5 @@
 export interface Ad {
-  id?: number;
+  id: number;
   link: string;
   picture: string;
   title: string;
@@ -7,5 +7,5 @@ export interface Ad {
 }
 
 export interface RecentAdsProps {
-  ads: Ad[];
+  ads?: Ad[];
 }

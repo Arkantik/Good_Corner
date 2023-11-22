@@ -1,40 +1,46 @@
 import { useEffect, useState } from "react";
-import { Ad } from "@/interfaces/ads";
-import AdCard from "./AdCard";
+import AdCard, { AdCardProps } from "./AdCard";
 import axios from "axios";
+import { Ad } from "@/interfaces/ads";
 
 export default function RecentAds() {
-    const [ads, setAds] = useState<Ad[]>([]);
+  const [totalPrice, setTotalPrice] = useState(0);
 
-    const fetchAds = () => {
-        axios
-            .get<Ad[]>("http://localhost:4000/ad")
-            .then((res) => {
-                setAds(res.data);
-            })
-            .catch((error) => {
-                console.error("Error fetching ads:", error);
-            });
-    };
+  const [ads, setAds] = useState<Ad[]>([]);
 
-    useEffect(() => {
-        fetchAds();
-    }, [])
+  useEffect(() => {
+    axios
+      .get<AdCardProps[]>("http://localhost:4000/ads")
+      .then((res) => {
+        setAds(res.data);
+      })
+      .catch(console.error);
+  }, []);
 
-    return (
-        <>
-            <h2>Annonces récentes</h2>
-            <section className="recent-ads">
-                {ads.map((ad) => (
-                    <AdCard
-                        key={ad.id}
-                        link={ad.link}
-                        picture={ad.picture}
-                        title={ad.title}
-                        price={ad.price}
-                    />
-                ))}
-            </section>
-        </>
-    )
-};
+  return (
+    <>
+      <h2>Annonces récentes</h2>
+      <p>prix total : {totalPrice}</p>
+      <section className="recent-ads">
+        {ads.map((ad) => (
+          <div key={ad.id}>
+            <AdCard
+              id={ad.id}
+              title={ad.title}
+              price={ad.price}
+              picture={ad.picture}
+              link={ad.link}
+            />
+            <button
+              onClick={() => {
+                setTotalPrice((oldTotal) => oldTotal + ad.price);
+              }}
+            >
+              Ajouter
+            </button>
+          </div>
+        ))}
+      </section>
+    </>
+  );
+}

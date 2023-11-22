@@ -1,23 +1,47 @@
 import "reflect-metadata";
 import express, { Request, Response } from "express";
-import cors from "cors";
 import { validate } from "class-validator";
-import { In, Like } from "typeorm";
 import db from "./db";
-
-// Entities
 import Ad from "./entities/Ad";
 import Category from "./entities/Category";
 import Tag from "./entities/Tag";
+import { In, Like } from "typeorm";
+import cors from "cors";
 
 const app = express();
-app.use(cors());
-app.use(express.json());
-
 const port = 4000;
 
-app.get("/", (req, res) => {
-  res.send("Hello World!");
+app.use(express.json());
+app.use(cors());
+
+app.get("/tags", async (req: Request, res: Response) => {
+  try {
+    const { name } = req.query;
+    const tags = await Tag.find({
+      where: { name: name ? Like(`%${name}%`) : undefined },
+    });
+    res.send(tags);
+  } catch (err) {
+    console.log(err);
+    res.sendStatus(500);
+  }
+});
+
+app.get("/categories", async (req: Request, res: Response) => {
+  const { name } = req.query;
+
+  try {
+    const categories = await Category.find({
+      relations: {
+        ads: true,
+      },
+      where: { name: name ? Like(`%${name}%`) : undefined },
+    });
+    res.send(categories);
+  } catch (err) {
+    console.log(err);
+    res.sendStatus(500);
+  }
 });
 
 app.get("/ads", async (req: Request, res: Response) => {
@@ -54,52 +78,15 @@ app.get("/ads", async (req: Request, res: Response) => {
   }
 });
 
-app.get("/categories", async (req: Request, res: Response) => {
-  const { name } = req.query;
-
-  try {
-    const categories = await Category.find({
-      relations: {
-        ads: true,
-      },
-      where: { name: name ? Like(`%${name}%`) : undefined },
-    });
-    res.send(categories);
-  } catch (err) {
-    console.log(err);
-    res.sendStatus(500);
-  }
-});
-
-app.get("/tags", async (req: Request, res: Response) => {
-  try {
-    const { name } = req.query;
-    const tags = await Tag.find({
-      where: { name: name ? Like(`%${name}%`) : undefined },
-    });
-    res.send(tags);
-  } catch (err) {
-    console.log(err);
-    res.sendStatus(500);
-  }
-});
-
-app.get("/ads/:id", async (req: Request, res: Response) => {
-  try {
-    const ad = await Ad.findOne({
-      where: { id: parseInt(req.params.id, 10) },
-      relations: { category: true, tags: true },
-    });
-    if (!ad) return res.sendStatus(404);
-    res.send(ad);
-  } catch (err) {
-    console.log(err);
-    res.sendStatus(500);
-  }
-});
-
 app.post("/ads", async (req: Request, res: Response) => {
   try {
+    /*
+      const newAd = new Ad()
+      newAd.title = req.body.title
+      newAd.price = req.body.price
+      ...
+      const newAdWithId = await newAd.save();
+    */
     const newAd = Ad.create(req.body);
     const errors = await validate(newAd);
     if (errors.length > 0) return res.status(422).send({ errors });
@@ -137,20 +124,6 @@ app.post("/tags", async (req: Request, res: Response) => {
   }
 });
 
-app.patch("/ads/:id", async (req: Request, res: Response) => {
-  try {
-    const adToUpdate = await Ad.findOneBy({ id: parseInt(req.params.id, 10) });
-    if (!adToUpdate) return res.sendStatus(404);
-    await Ad.merge(adToUpdate, req.body);
-    const errors = await validate(adToUpdate);
-    if (errors.length > 0) return res.status(422).send({ errors });
-    res.send(await adToUpdate.save());
-  } catch (err) {
-    console.log(err);
-    res.sendStatus(500);
-  }
-});
-
 app.delete("/ads/:id", async (req: Request, res: Response) => {
   try {
     const adToDelete = await Ad.findOneBy({ id: parseInt(req.params.id, 10) });
@@ -177,7 +150,35 @@ app.delete("/tags/:id", async (req: Request, res: Response) => {
   }
 });
 
+app.get("/ads/:id", async (req: Request, res: Response) => {
+  try {
+    const ad = await Ad.findOne({
+      where: { id: parseInt(req.params.id, 10) },
+      relations: { category: true, tags: true },
+    });
+    if (!ad) return res.sendStatus(404);
+    res.send(ad);
+  } catch (err) {
+    console.log(err);
+    res.sendStatus(500);
+  }
+});
+
+app.patch("/ads/:id", async (req: Request, res: Response) => {
+  try {
+    const adToUpdate = await Ad.findOneBy({ id: parseInt(req.params.id, 10) });
+    if (!adToUpdate) return res.sendStatus(404);
+    await Ad.merge(adToUpdate, req.body);
+    const errors = await validate(adToUpdate);
+    if (errors.length > 0) return res.status(422).send({ errors });
+    res.send(await adToUpdate.save());
+  } catch (err) {
+    console.log(err);
+    res.sendStatus(500);
+  }
+});
+
 app.listen(port, async () => {
   await db.initialize();
-  console.log(`Example app listening on port ${port}`);
+  console.log(`Server running on http://localhost:${port}`);
 });

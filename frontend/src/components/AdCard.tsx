@@ -1,18 +1,23 @@
-import Image from "next/image";
+import { useEffect } from "react";
 
-// Interfaces
-import { Ad } from "@/interfaces/ads";
-
-export default function AdCard({ title, picture, price, link }: Ad) {
-    return (
-        <div className="ad-card-container">
-            <a className="ad-card-link" href={link}>
-                <Image className="ad-card-image" src={picture} alt={title} width={400} height={250} />
-                <div className="ad-card-text">
-                    <div className="ad-card-title">{title}</div>
-                    <div className="ad-card-price">{price}€</div>
-                </div>
-            </a>
-        </div>
-    )
+export type AdCardProps = {
+  id: number;
+  price: number;
+  title: string;
+  picture: string;
+  link: string;
 };
+
+export default function AdCard({ title, price, picture, link }: AdCardProps) {
+  return (
+    <div className="ad-card-container">
+      <a className="ad-card-link" href={link}>
+        <img className="ad-card-image" src={picture} />
+        <div className="ad-card-text">
+          <div className="ad-card-title">{title}</div>
+          <div className="ad-card-price">{price} €</div>
+        </div>
+      </a>
+    </div>
+  );
+}
