@@ -39,10 +39,15 @@ export default class Ad extends BaseEntity {
   @CreateDateColumn()
   createdAt: Date;
 
-  @ManyToOne(() => Category, (category) => category.ads)
+  @ManyToOne(() => Category, (category) => category.ads, {
+    cascade: true,
+    onDelete: "CASCADE",
+  })
   category: Category;
 
   @JoinTable()
-  @ManyToMany(() => Tag, (tag) => tag.ads)
+  @ManyToMany(() => Tag, (tag) => tag.ads, {
+    cascade: true,
+  })
   tags: Tag[];
 }
