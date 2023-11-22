@@ -1,6 +1,7 @@
 export interface Ad {
+  id?: number;
   link: string;
-  imgUrl: string;
+  picture: string;
   title: string;
   price: number;
 }
