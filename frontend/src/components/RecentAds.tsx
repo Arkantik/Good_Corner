@@ -1,43 +1,18 @@
 import { useEffect, useState } from "react";
 import AdCard, { AdCardProps } from "./AdCard";
 import axios from "axios";
-import { Ad } from "@/interfaces/ads";
+import { Ad, RecentAdsProps } from "@/interfaces/ads";
 
-export default function RecentAds() {
-  const [totalPrice, setTotalPrice] = useState(0);
-
-  const [ads, setAds] = useState<Ad[]>([]);
-
-  useEffect(() => {
-    axios
-      .get<AdCardProps[]>("http://localhost:4000/ads")
-      .then((res) => {
-        setAds(res.data);
-      })
-      .catch(console.error);
-  }, []);
-
+export default function RecentAds({ filteredAds }: RecentAdsProps) {
   return (
     <>
-      <h2>Annonces récentes</h2>
-      <p>prix total : {totalPrice}</p>
+      <h1>Annonces récentes</h1>
       <section className="recent-ads">
-        {ads.map((ad) => (
-          <div key={ad.id}>
+        {filteredAds.map((filteredAd) => (
+          <div key={filteredAd.id}>
             <AdCard
-              id={ad.id}
-              title={ad.title}
-              price={ad.price}
-              picture={ad.picture}
-              link={ad.link}
+              {...filteredAd}
             />
-            <button
-              onClick={() => {
-                setTotalPrice((oldTotal) => oldTotal + ad.price);
-              }}
-            >
-              Ajouter
-            </button>
           </div>
         ))}
       </section>
