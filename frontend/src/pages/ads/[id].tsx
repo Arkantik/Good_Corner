@@ -4,8 +4,7 @@ import { AdDetails as AdDetailsType } from "@/interfaces/ads";
 import { useRouter } from "next/router";
 import { useEffect, useState } from "react";
 import axios from "axios";
-import { UserCircleIcon } from "@heroicons/react/24/outline";
-import { MapPinIcon } from "@heroicons/react/24/outline";
+import { UserCircleIcon, MapPinIcon } from "@heroicons/react/24/outline";
 
 export default function AdDetails() {
   const router = useRouter();
