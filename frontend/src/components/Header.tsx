@@ -82,7 +82,7 @@ export default function Header() {
           <p>Admin</p>
         </Link>
       </div>
-      <nav className="flex pl-2 h-[54px]">
+      <nav className="flex justify-center gap-4 h-[54px]">
         {categories.map((cat) => {
           const [firstLetter, ...resetOfCatName] = cat.name.split("");
           const catName = firstLetter.toUpperCase() + resetOfCatName.join("");
@@ -90,7 +90,7 @@ export default function Header() {
 
           return (
             <div
-              className={`p-2 rounded-lg mt-3 cursor-pointer ${isActive ? "bg-[#ffa41b] text-white" : ""
+              className={`p-2 rounded-lg mt-3 cursor-pointer hover:text-[#ffa41b] duration-200 ${isActive ? "bg-[#ffa41b] text-white" : ""
                 }`}
               onClick={() => {
                 router.push(
