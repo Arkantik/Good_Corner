@@ -6,6 +6,7 @@ import Layout from "@/layouts/Layout";
 import { useRouter } from "next/router";
 import Link from "next/link";
 import { TrashIcon, PencilIcon } from "@heroicons/react/24/outline";
+import LayoutAdmin from "@/layouts/LayoutAdmin";
 
 export default function RecentAds() {
     const [ads, setAds] = useState<Ad[]>([]);
@@ -17,7 +18,7 @@ export default function RecentAds() {
             .delete(`http://localhost:4000/ads/${adId}`)
             .then((res) => {
                 setAds((prevAds) => prevAds.filter((ad) => ad.id !== adId));
-                router.push(`/admin`);
+                router.push(`/admin/annonces`);
             })
             .catch(console.error);
     };
@@ -32,7 +33,7 @@ export default function RecentAds() {
     }, []);
 
     return (
-        <Layout pageTitle="Admin">
+        <LayoutAdmin pageTitle="Gestion des annonces">
             <div className="pt-6">
                 <h2 className="text-2xl mb-6">Gestion des annonces</h2>
 
@@ -45,7 +46,7 @@ export default function RecentAds() {
                                     <TrashIcon width={24} height={24} />{" "}
                                     Delete ad
                                 </button>
-                                <Link className="flex items-center gap-2 hover:text-green-600" href={`/editAd/${ad.id}`}>
+                                <Link className="flex items-center gap-2 hover:text-green-600" href={`/admin/annonces/${ad.id}`}>
                                     Update ad
                                     <PencilIcon width={24} height={24} />{" "}
                                 </Link>
@@ -54,6 +55,6 @@ export default function RecentAds() {
                     ))}
                 </section>
             </div>
-        </Layout>
+        </LayoutAdmin>
     );
 }

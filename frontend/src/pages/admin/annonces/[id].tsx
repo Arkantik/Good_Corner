@@ -1,9 +1,9 @@
-import Layout from "@/layouts/Layout";
 import { Category } from "@/components/Header";
 import { FormEvent, useEffect, useState } from "react";
 import axios from "axios";
 import { useRouter } from "next/router";
-import { Ad, AdDetails } from "@/interfaces/ads";
+import { AdDetails } from "@/interfaces/ads";
+import LayoutAdmin from "@/layouts/LayoutAdmin";
 
 export default function EditAd() {
   const router = useRouter();
@@ -50,7 +50,7 @@ export default function EditAd() {
   };
 
   return (
-    <Layout pageTitle="Creation d'une annonce">
+    <LayoutAdmin pageTitle="Edition d'une annonce">
       <h1 className="pt-6 pb-6 text-2xl">Editer une annonce</h1>
 
       <form onSubmit={handleEdit} className="flex flex-col pb-12 gap-3">
@@ -196,6 +196,6 @@ export default function EditAd() {
           Envoyer
         </button>
       </form>
-    </Layout>
+    </LayoutAdmin>
   );
 }
