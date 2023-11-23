@@ -12,7 +12,7 @@ export default function AdCard({ ad: { id, price, title, picture }, link }: AdCa
   const router = useRouter();
 
   return (
-    <button className="w-[400px]" onClick={() => router.push(`/ads/${id}`)}>
+    <button className="w-[400px] hover:scale-105 transform duration-300" onClick={() => router.push(`/ads/${id}`)}>
       <a className="ad-card-link" href={link}>
         <div className="shadow-md border rounded-lg  p-6 bg-white mr-3 mb-3">
           <img

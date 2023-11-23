@@ -31,10 +31,10 @@ export default function Header() {
   const searchParams = qs.parse(window.location.search) as any;
 
   return (
-    <header className="header">
+    <header className="header z-10">
       <div className="main-menu">
         <h1>
-          <Link href="/" className="button logo link-button">
+          <Link href="/" className="button logo link-button ">
             <span className="mobile-short-label">TGC</span>
             <span className="desktop-long-label text-xl">THE GOOD CORNER</span>
           </Link>
@@ -74,7 +74,7 @@ export default function Header() {
             </svg>
           </button>
         </form>
-        <Link href="/newAd" className="button link-button">
+        <Link href="/newAd" className="button link-button hover:bg-[#fff2df] duration-100">
           <span className="mobile-short-label">Publier</span>
           <span className="desktop-long-label">Publier une annonce</span>
         </Link>

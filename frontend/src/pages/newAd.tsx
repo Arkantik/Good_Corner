@@ -34,9 +34,9 @@ export default function NewAd() {
     <Layout pageTitle="Creation d'une annonce">
       <h1 className="pt-6 pb-6 text-2xl">Creer une annonce</h1>
 
-      <form onSubmit={handleSubmit} className="pb-12">
-        <div className="flex flex-wrap gap-6 mb-3">
-          <div className="form-control w-full max-w-xs">
+      <form onSubmit={handleSubmit} className="flex flex-col pb-12 gap-3">
+        <div className="flex flex-wrap md:flex-nowrap gap-6">
+          <div className="form-control w-full">
             <label className="label" htmlFor="title">
               <span className="label-text">Titre</span>
             </label>
@@ -46,10 +46,10 @@ export default function NewAd() {
               name="title"
               id="title"
               placeholder="Zelda : Ocarina of time"
-              className="input input-bordered w-full max-w-xs"
+              className="input input-bordered w-full"
             />
           </div>
-          <div className="form-control w-full max-w-xs">
+          <div className="form-control w-full">
             <label className="label" htmlFor="picture">
               <span className="label-text">Image</span>
             </label>
@@ -59,13 +59,13 @@ export default function NewAd() {
               id="picture"
               required
               placeholder="https://imageshack.com/zoot.png"
-              className="input input-bordered w-full max-w-xs"
+              className="input input-bordered w-full"
             />
           </div>
         </div>
 
-        <div className="flex flex-wrap gap-6 mb-3">
-          <div className="form-control w-full max-w-xs">
+        <div className="flex flex-wrap md:flex-nowrap gap-6">
+          <div className="form-control w-full">
             <label className="label" htmlFor="location">
               <span className="label-text">Localisation</span>
             </label>
@@ -75,11 +75,11 @@ export default function NewAd() {
               id="location"
               required
               placeholder="Paris"
-              className="input input-bordered w-full max-w-xs"
+              className="input input-bordered w-full"
             />
           </div>
 
-          <div className="form-control w-full max-w-xs">
+          <div className="form-control w-full">
             <label className="label" htmlFor="owner">
               <span className="label-text">Auteur</span>
             </label>
@@ -89,7 +89,7 @@ export default function NewAd() {
               id="owner"
               required
               placeholder="Link"
-              className="input input-bordered w-full max-w-xs"
+              className="input input-bordered w-full"
             />
           </div>
         </div>
@@ -108,8 +108,8 @@ export default function NewAd() {
           ></textarea>
         </div>
 
-        <div className="flex flex-wrap gap-6 mb-3 mt-6">
-          <div className="form-control w-full max-w-xs">
+        <div className="flex flex-wrap md:flex-nowrap gap-6">
+          <div className="form-control w-full">
             <label className="label" htmlFor="price">
               <span className="label-text">Prix</span>
             </label>
@@ -120,11 +120,11 @@ export default function NewAd() {
               id="price"
               min={0}
               placeholder="30"
-              className="input input-bordered w-full max-w-xs"
+              className="input input-bordered w-full"
             />
           </div>
 
-          <div className="form-control w-full max-w-xs">
+          <div className="form-control w-full">
             <label className="label" htmlFor="category">
               <span className="label-text">Catégorie</span>
             </label>
