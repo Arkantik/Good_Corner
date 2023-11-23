@@ -9,3 +9,10 @@ export interface Ad {
 export interface RecentAdsProps {
   filteredAds: Ad[];
 }
+
+export type AdDetails = Ad & {
+  location: string;
+  owner: string;
+  description: string;
+  createdAt: string;
+};
