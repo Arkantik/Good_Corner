@@ -1,48 +1,54 @@
 /* eslint-disable @next/next/no-img-element */
-import { Ad } from "@/interfaces/ads";
 import Layout from "@/layouts/Layout";
-import axios from "axios";
-import Link from "next/link";
+import { AdDetails as AdDetailsType } from "@/interfaces/ads";
 import { useRouter } from "next/router";
 import { useEffect, useState } from "react";
+import axios from "axios";
+import { UserCircleIcon } from "@heroicons/react/24/outline";
+import { MapPinIcon } from "@heroicons/react/24/outline";
 
 export default function AdDetails() {
-  const [adDetails, setAdDetails] = useState<Ad>();
   const router = useRouter();
+  const { id } = router.query;
+  const [ad, setAd] = useState<AdDetailsType>();
 
   useEffect(() => {
-    const fetchAdDetails = () => {
-      axios
-        .get(`http://localhost:4000/ads/${router.query.id}`)
-        .then((res) => setAdDetails(res.data))
-        .catch((error) => {
-          console.log("Error fetching ad details", error);
-        });
-    };
-
-    if (router.query.id) {
-      fetchAdDetails();
-    }
-  }, [router.query.id]);
+    axios
+      .get<AdDetailsType>(`http://localhost:4000/ads/${id}`)
+      .then((res) => setAd(res.data))
+      .catch(console.error);
+  }, [id]);
 
   return (
-    <Layout pageTitle="Details d'une annonce">
-      <div>
-        <h1>Details de l&apos;annonce #{router.query.id}</h1>
-        <Link href={"/"}>Retour à l&apos;acceuil</Link>
-      </div>
+    <Layout pageTitle={ad?.title ? ad.title + " - TGC" : "The Good Corner"}>
+      <div className="pt-12 pb-12">
+        <div className="p-6 bg-white shadow-lg rounded-2xl">
+          {typeof ad === "undefined" ? (
+            "Chargement..."
+          ) : (
+            <div className="">
+              <div className="flex justify-between items-center">
+                <h1 className="text-3xl">{ad.title}</h1>
+                <p className="text-2xl">{ad.price} €</p>
+              </div>
 
-      {adDetails ? (
-        <section className="ad-card-container">
-          <div className="ad-card-text">
-            <h2 className="ad-card-title">Titre: {adDetails.title}</h2>
-            <h3 className="ad-card-price">Prix: {adDetails.price} €</h3>
-          </div>
-          <img src={adDetails.picture} alt={adDetails.title} className="ad-card-image" />
-        </section>
-      ) : (
-        <p>Loading...</p>
-      )}
+              <img src={ad.picture} alt={ad.title} className="mt-6 mb-6" />
+              <p className="mt-6 mb-6">{ad.description}</p>
+              <div className="flex justify-between mb-6">
+                <div className="flex items-center mt-3">
+                  <UserCircleIcon width={24} height={24} className="mr-2" />{" "}
+                  {ad.owner}
+                </div>
+
+                <div className="flex items-center mt-2 ">
+                  <MapPinIcon width={24} height={24} className="mr-2" />{" "}
+                  {ad.location}
+                </div>
+              </div>
+            </div>
+          )}
+        </div>
+      </div>
     </Layout>
   );
 }

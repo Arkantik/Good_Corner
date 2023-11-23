@@ -1,21 +1,29 @@
 import { useEffect, useState } from "react";
-import AdCard, { AdCardProps } from "./AdCard";
+import AdCard from "./AdCard";
 import axios from "axios";
-import { Ad, RecentAdsProps } from "@/interfaces/ads";
+import { Ad } from "@/interfaces/ads";
 
-export default function RecentAds({ filteredAds }: RecentAdsProps) {
+export default function RecentAds() {
+  const [ads, setAds] = useState<Ad[]>([]);
+
+  useEffect(() => {
+    axios
+      .get<Ad[]>("http://localhost:4000/ads")
+      .then((res) => {
+        setAds(res.data);
+      })
+      .catch(console.error);
+  }, []);
+
   return (
-    <>
-      <h1>Annonces récentes</h1>
-      <section className="recent-ads">
-        {filteredAds.map((filteredAd) => (
-          <div key={filteredAd.id}>
-            <AdCard
-              {...filteredAd}
-            />
-          </div>
+    <div className="pt-6">
+      <h2 className="text-2xl mb-6">Annonces récentes</h2>
+
+      <section className="flex flex-wrap pb-24">
+        {ads.map((ad) => (
+          <AdCard key={ad.id} ad={ad} link={`/ads/${ad.id}`} />
         ))}
       </section>
-    </>
+    </div>
   );
 }
