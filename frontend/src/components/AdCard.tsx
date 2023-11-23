@@ -5,16 +5,16 @@ import { useRouter } from "next/router";
 
 export type AdCardProps = {
   ad: Ad;
-  link: string;
+  link?: string;
 };
 
 export default function AdCard({ ad: { id, price, title, picture }, link }: AdCardProps) {
   const router = useRouter();
 
   return (
-    <button className="w-[400px] hover:scale-105 transform duration-300" onClick={() => router.push(`/ads/${id}`)}>
+    <button className="w-[360px] md:w-[400px] hover:scale-105 transform duration-300" onClick={() => router.push(`/ads/${id}`)}>
       <a className="ad-card-link" href={link}>
-        <div className="shadow-md border rounded-lg  p-6 bg-white mr-3 mb-3">
+        <div className="shadow-md border rounded-lg p-6 bg-white mb-3 md:mr-3">
           <img
             className="h-[200px] w-full object-cover rounded-md"
             src={picture}
