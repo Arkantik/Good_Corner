@@ -1,5 +1,14 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
 * {
   box-sizing: border-box;
+}
+
+html,
+body {
+  height: 100%;
 }
 
 body {
@@ -45,13 +54,6 @@ h1 {
   color: inherit;
 }
 
-.category-navigation-link:hover {
-  color: #ffa41b;
-  transition-delay: 50ms;
-  transition-duration: 300ms;
-  transition: ease-in-out;
-}
-
 .button {
   min-width: 40px;
   height: 40px;
@@ -71,7 +73,6 @@ h1 {
 
 .logo {
   border: none;
-  text-decoration: none;
 }
 
 .button-primary {
@@ -101,14 +102,11 @@ h1 {
   border-radius: 8px;
   font-size: 12px;
   font-family: inherit;
+  outline: none;
 }
 
 .link-button {
   text-decoration: none;
-}
-
-.link-button:hover {
-  background-color: rgba(255, 164, 47, 0.1);
 }
 
 .desktop-long-label {
@@ -116,12 +114,14 @@ h1 {
 }
 
 .main-content {
-  display: flex;
-  flex-direction: column;
-  gap: 2rem;
   max-width: 832px;
   padding: 0 16px;
-  margin: 120px auto 48px;
+  margin: 110px auto 48px;
+  background-color: #f5f5f5;
+}
+
+#__next {
+  background-color: #f5f5f5;
 }
 
 .recent-ads {
@@ -131,40 +131,20 @@ h1 {
 }
 
 .ad-card-container {
-  display: flex;
-  flex-direction: column;
-  padding: 8px;
   border-radius: 8px;
   border: 1px solid lightgray;
   color: inherit;
   background-color: white;
-  width: 100%;
-  height: 100%;
-}
-
-.ad-details {
-  padding: 8px;
-  border-radius: 8px;
-  border: 1px solid lightgray;
-  color: inherit;
-  background-color: white;
-  width: 100%;
-  height: 100%;
 }
 
 .ad-card-link {
-  display: flex;
-  flex-direction: column;
-  justify-content: space-between;
-  height: 100%;
   text-decoration: inherit;
   color: inherit;
-  cursor: pointer;
 }
 
 .ad-card-image {
   width: 100%;
-  border-radius: 6px;
+  border-radius: 8px;
 }
 
 .ad-card-text {
@@ -223,7 +203,7 @@ h1 {
 }
 
 .ad-details-price {
-  font-weight: normal;
+  font-weight: bold;
 }
 
 .separator {
