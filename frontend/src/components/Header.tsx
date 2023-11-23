@@ -78,6 +78,9 @@ export default function Header() {
           <span className="mobile-short-label">Publier</span>
           <span className="desktop-long-label">Publier une annonce</span>
         </Link>
+        <Link href="/admin" className="button link-button hover:bg-[#fff2df] duration-100">
+          <p>Admin</p>
+        </Link>
       </div>
       <nav className="flex pl-2 h-[54px]">
         {categories.map((cat) => {
