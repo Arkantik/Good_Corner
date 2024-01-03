@@ -8,6 +8,21 @@ import Tag from "./entities/Tag";
 import { In, Like } from "typeorm";
 import cors from "cors";
 
+import { ApolloServer } from "@apollo/server";
+import { startStandaloneServer } from "@apollo/server/standalone";
+import { buildSchema } from "type-graphql";
+import AdResolver from "./resolvers/AdResolver";
+import TagResolver from "./resolvers/TagResolver";
+
+buildSchema({ resolvers: [AdResolver, TagResolver] }).then((schema) => {
+  const server = new ApolloServer({ schema });
+  startStandaloneServer(server, {
+    listen: { port: 4000 },
+  }).then(({ url }) => {
+    console.log(` server ready on ${url}`);
+  });
+});
+
 const app = express();
 const port = 4000;
 
@@ -140,18 +155,18 @@ app.delete("/categories/:id", async (req: Request, res: Response) => {
   }
 });
 
-app.post("/tags", async (req: Request, res: Response) => {
-  try {
-    const newTag = Tag.create(req.body);
-    const errors = await validate(newTag);
-    if (errors.length > 0) return res.status(422).send({ errors });
-    const newTagWithId = await newTag.save();
-    res.send(newTagWithId);
-  } catch (err) {
-    console.log(err);
-    res.sendStatus(500);
-  }
-});
+// app.post("/tags", async (req: Request, res: Response) => {
+//   try {
+//     const newTag = Tag.create(req.body);
+//     const errors = await validate(newTag);
+//     if (errors.length > 0) return res.status(422).send({ errors });
+//     const newTagWithId = await newTag.save();
+//     res.send(newTagWithId);
+//   } catch (err) {
+//     console.log(err);
+//     res.sendStatus(500);
+//   }
+// });
 
 app.delete("/ads/:id", async (req: Request, res: Response) => {
   try {
