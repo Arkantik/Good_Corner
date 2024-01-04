@@ -18,7 +18,6 @@ export default function Search() {
 
     const ads = data?.ads || [];
 
-
     return (
         <Layout pageTitle="recherche - TGC">
             {ads.length === 0 && (
