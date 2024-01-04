@@ -1,8 +1,0 @@
-query RecentAds($title: String, $categoryId: String) {
-  ads(title: $title, categoryId: $categoryId) {
-    id
-    title
-    price
-    picture
-  }
-}
