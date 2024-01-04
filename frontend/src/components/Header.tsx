@@ -1,22 +1,11 @@
-import axios from "axios";
-import Link from "next/link";
-import { useRouter } from "next/router";
 import { useEffect, useState } from "react";
+import { useRouter } from "next/router";
+import Link from "next/link";
 import qs from "query-string";
-import { Category } from "@/interfaces/categories";
-import { gql, useQuery } from "@apollo/client";
-
-const GET_CATEGORIES = gql`
-  query Categories {
-    categories {
-      id
-      name
-    }
-  }
-`;
+import { useAllCategoriesQuery } from "@/graphql/generated/schema";
 
 export default function Header() {
-  const { data: categoriesData } = useQuery<{ categories: Category[] }>(GET_CATEGORIES);
+  const { data: categoriesData } = useAllCategoriesQuery();
   const router = useRouter();
 
   const categories = categoriesData?.categories || []

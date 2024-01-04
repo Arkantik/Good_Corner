@@ -1,61 +1,16 @@
 import Layout from "@/layouts/Layout";
-import { FormEvent, useEffect, useState } from "react";
+import { FormEvent, useState } from "react";
 import { useRouter } from "next/router";
-import { gql, useMutation, useQuery } from "@apollo/client";
 import axios from "axios";
 import Select from "react-select";
 import { Category } from "@/interfaces/categories";
 import { Tag } from "@/interfaces/tag";
-
-const CREATE_AD_MUTATION = gql`
-mutation CreateAd($data: NewAdInput!) {
-  createAd(data: $data){
-    id
-  }
-}
-`;
-
-const GET_CATEGORIES = gql`
-  query Categories {
-    categories {
-      id
-      name
-    }
-  }
-`;
-
-const GET_TAGS = gql`
-  query Tags {
-    tags {
-      id
-      name
-    }
-  }
-`;
+import { useAllCategoriesQuery, useAllTagsQuery, useCreateAdMutation } from "@/graphql/generated/schema";
 
 export default function NewAd() {
-  const [createAd] = useMutation<
-    { createAd: { id: number } },
-    {
-      data: {
-        title: string;
-        description: string;
-        owner: string;
-        price: number;
-        location: string;
-        picture: string;
-        category: {
-          id: number;
-        };
-        tags: {
-          id: number;
-        }[];
-      };
-    }
-  >(CREATE_AD_MUTATION);
-
-  const { data: categoriesData } = useQuery<{ categories: Category[] }>(GET_CATEGORIES);
-  const { data: tagsData } = useQuery<{ tags: Tag[] }>(GET_TAGS);
+  const [createAd] = useCreateAdMutation()
+  const { data: categoriesData } = useAllCategoriesQuery();
+  const { data: tagsData } = useAllTagsQuery();
   const [selectedCategory, setSelectedCategory] = useState<Category[]>([]);
   const [selectedTags, setSelectedTags] = useState<Tag[]>([]);
 

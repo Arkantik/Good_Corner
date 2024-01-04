@@ -3,30 +3,13 @@ import Layout from "@/layouts/Layout";
 import { AdDetails, AdDetails as AdDetailsType } from "@/interfaces/ads";
 import { useRouter } from "next/router";
 import { UserCircleIcon, MapPinIcon } from "@heroicons/react/24/outline";
-import { gql, useQuery } from "@apollo/client";
-
-const GET_AD_DETAILS = gql`
-query GetAdById($adId: Int!) {
-  getAdById(adId: $adId) {
-    id
-    title
-    description
-    owner
-    price
-    location
-    picture
-    tags {
-      id
-      name
-    }
-  }
-}`;
+import { useAdDetailsQuery } from "@/graphql/generated/schema";
 
 export default function AdDetails() {
   const router = useRouter();
   const { id } = router.query;
 
-  const { data } = useQuery<{ getAdById: AdDetails }>(GET_AD_DETAILS, {
+  const { data } = useAdDetailsQuery({
     variables: { adId: parseInt(id as string) },
     skip: typeof id === "undefined"
   });
