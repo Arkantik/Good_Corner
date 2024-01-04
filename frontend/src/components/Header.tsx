@@ -3,22 +3,23 @@ import Link from "next/link";
 import { useRouter } from "next/router";
 import { useEffect, useState } from "react";
 import qs from "query-string";
+import { Category } from "@/interfaces/categories";
+import { gql, useQuery } from "@apollo/client";
 
-export interface Category {
-  id: number;
-  name: string;
-};
+const GET_CATEGORIES = gql`
+  query Categories {
+    categories {
+      id
+      name
+    }
+  }
+`;
 
 export default function Header() {
-  const [categories, setCategories] = useState<Category[]>([]);
+  const { data: categoriesData } = useQuery<{ categories: Category[] }>(GET_CATEGORIES);
   const router = useRouter();
 
-  useEffect(() => {
-    axios
-      .get("http://localhost:4000/categories")
-      .then((res) => setCategories(res.data))
-      .catch(console.error);
-  }, []);
+  const categories = categoriesData?.categories || []
 
   const [search, setSearch] = useState("");
 
