@@ -1,22 +1,37 @@
 /* eslint-disable @next/next/no-img-element */
 import Layout from "@/layouts/Layout";
-import { AdDetails as AdDetailsType } from "@/interfaces/ads";
+import { AdDetails, AdDetails as AdDetailsType } from "@/interfaces/ads";
 import { useRouter } from "next/router";
-import { useEffect, useState } from "react";
-import axios from "axios";
 import { UserCircleIcon, MapPinIcon } from "@heroicons/react/24/outline";
+import { gql, useQuery } from "@apollo/client";
+
+const GET_AD_DETAILS = gql`
+query GetAdById($adId: Int!) {
+  getAdById(adId: $adId) {
+    id
+    title
+    description
+    owner
+    price
+    location
+    picture
+    tags {
+      id
+      name
+    }
+  }
+}`;
 
 export default function AdDetails() {
   const router = useRouter();
   const { id } = router.query;
-  const [ad, setAd] = useState<AdDetailsType>();
 
-  useEffect(() => {
-    axios
-      .get<AdDetailsType>(`http://localhost:4000/ads/${id}`)
-      .then((res) => setAd(res.data))
-      .catch(console.error);
-  }, [id]);
+  const { data } = useQuery<{ getAdById: AdDetails }>(GET_AD_DETAILS, {
+    variables: { adId: parseInt(id as string) },
+    skip: typeof id === "undefined"
+  });
+
+  const ad = data?.getAdById
 
   return (
     <Layout pageTitle={ad?.title ? ad.title + " - TGC" : "The Good Corner"}>
@@ -25,9 +40,23 @@ export default function AdDetails() {
           {typeof ad === "undefined" ? (
             "Chargement..."
           ) : (
-            <div className="">
-              <div className="flex justify-between items-center">
-                <h1 className="text-3xl">{ad.title}</h1>
+            <div>
+              <div className="flex justify-between items-start md:items-center">
+                <div className="flex items-start md:items-center flex-col md:flex-row">
+                  <h1 className="text-3xl">{ad.title}</h1>
+
+                  <div className="md:ml-4 mt-4 md:mt-0">
+                    {ad.tags.map((t) => (
+                      <span
+                        className="bg-slate-100 rounded-badge p-2 mr-2 text-gray-600 border-slate-300 border "
+                        key={t.id}
+                      >
+                        {t.name}
+                      </span>
+                    ))}
+                  </div>
+                </div>
+
                 <p className="text-2xl">{ad.price} €</p>
               </div>
 
