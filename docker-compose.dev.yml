@@ -1,0 +1,17 @@
+services:
+  frontend:
+    build: ./frontend
+    ports:
+      - 3000:3000
+    command: npm run dev
+    volumes:
+      - ./frontend/src/:/app/src/
+    env_file: ./global.env
+  backend:
+    build: ./backend
+    ports:
+      - 4000:4000
+    command: npm start
+    volumes:
+      - ./backend/src/:/app/src/
+    env_file: ./global.env
