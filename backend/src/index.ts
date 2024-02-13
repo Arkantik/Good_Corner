@@ -1,9 +1,6 @@
 import "reflect-metadata";
 import express, { Request, Response } from "express";
 import db from "./db";
-import Ad from "./entities/Ad";
-import Category from "./entities/Category";
-import Tag from "./entities/Tag";
 import cors from "cors";
 
 import { ApolloServer } from "@apollo/server";
@@ -17,7 +14,7 @@ buildSchema({ resolvers: [AdResolver, CategoryResolver, TagResolver] }).then(
   (schema) => {
     const server = new ApolloServer({ schema });
     startStandaloneServer(server, {
-      listen: { port: 4001 },
+      listen: { port: 4000 },
     }).then(({ url }) => {
       console.log(` server ready on ${url}`);
     });
@@ -25,7 +22,6 @@ buildSchema({ resolvers: [AdResolver, CategoryResolver, TagResolver] }).then(
 );
 
 const app = express();
-const port = 4000;
 
 app.use(express.json());
 app.use(cors());
@@ -240,7 +236,6 @@ app.use(cors());
 //   }
 // });
 
-app.listen(port, async () => {
+app.listen(async () => {
   await db.initialize();
-  console.log(`Server running on http://localhost:${port}`);
 });
