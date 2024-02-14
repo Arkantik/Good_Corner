@@ -3,7 +3,7 @@ import Layout from "@/layouts/Layout";
 
 export default function Home() {
   return (
-    <Layout pageTitle="Acceuil">
+    <Layout pageTitle="Accueil">
       <RecentAds />
     </Layout>
   );
