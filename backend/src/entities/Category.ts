@@ -6,12 +6,12 @@ import {
   OneToMany,
 } from "typeorm";
 import { ObjectType, Field, Int, InputType } from "type-graphql";
-import Ad from "./Ad";
+import { Ad } from "./Ad";
 import { Length } from "class-validator";
 
 @Entity()
 @ObjectType()
-export default class Category extends BaseEntity {
+export class Category extends BaseEntity {
   @PrimaryGeneratedColumn()
   @Field(() => Int)
   id: number;

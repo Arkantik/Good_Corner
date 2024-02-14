@@ -10,13 +10,14 @@ import {
 } from "typeorm";
 import { Length, Min } from "class-validator";
 import { ObjectType, Field, Int, InputType } from "type-graphql";
-import Category from "./Category";
-import Tag from "./Tag";
-import { ObjectId } from "../types";
+import { Category } from "./Category";
+import { Tag } from "./Tag";
+import { ObjectId } from "../utils";
+import User from "./User";
 
 @Entity()
 @ObjectType()
-export default class Ad extends BaseEntity {
+export class Ad extends BaseEntity {
   @PrimaryGeneratedColumn()
   @Field(() => Int)
   id: number;
@@ -29,9 +30,12 @@ export default class Ad extends BaseEntity {
   @Field()
   description: string;
 
-  @Column()
   @Field()
-  owner: string;
+  @ManyToOne(() => User, (c) => c.ads, {
+    cascade: true,
+    onDelete: "CASCADE",
+  })
+  owner: User;
 
   @Column({ type: "float" })
   @Field()
@@ -74,9 +78,6 @@ export class NewAdInput {
   description: string;
 
   @Field()
-  owner: string;
-
-  @Field()
   @Min(0, { message: "le prix doit etre positif" })
   price: number;
 
@@ -100,9 +101,6 @@ export class UpdateAdInput {
 
   @Field({ nullable: true })
   description?: string;
-
-  @Field({ nullable: true })
-  owner?: string;
 
   @Field({ nullable: true })
   @Min(0, { message: "le prix doit etre positif" })

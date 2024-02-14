@@ -5,13 +5,13 @@ import {
   BaseEntity,
   ManyToMany,
 } from "typeorm";
-import Ad from "./Ad";
+import { Ad } from "./Ad";
 import { Length } from "class-validator";
 import { ObjectType, Field, Int, InputType } from "type-graphql";
 
 @Entity()
 @ObjectType()
-export default class Tag extends BaseEntity {
+export class Tag extends BaseEntity {
   @PrimaryGeneratedColumn()
   @Field(() => Int)
   id: number;
