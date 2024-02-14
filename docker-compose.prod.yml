@@ -4,10 +4,12 @@ services:
     environment:
       POSTGRES_PASSWORD: postgres
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready"]
+      test: ["CMD-SHELL", "pg_isready -d postgres -U postgres"]
       interval: 10s
       timeout: 5s
       retries: 5
+    ports:
+      - 5432:5432
 
   backend:
     depends_on:
@@ -21,6 +23,13 @@ services:
     volumes:
       - ./backend/src:/app/src/
     env_file: ./global.env
+
+  upload-service:
+    build: upload
+    ports:
+      - 8000:8000
+    volumes:
+      - ./upload/files:/app/files
 
   frontend:
     build:
