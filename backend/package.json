@@ -5,7 +5,10 @@
   "main": "index.ts",
   "scripts": {
     "start": "ts-node-dev ./src/index.ts",
-    "resetDB": "ts-node-dev src/resetDb.ts"
+    "dev": "nodemon --legacy-watch src/index.ts",
+    "build": "tsc",
+    "resetDB": "ts-node-dev src/resetDb.ts",
+    "start:prod": "node build/index.js"
   },
   "keywords": [
     "ads"
@@ -19,8 +22,10 @@
     "express": "^4.18.2",
     "graphql": "^16.8.1",
     "graphql-scalars": "^1.22.4",
+    "nodemon": "^3.0.3",
+    "pg": "^8.11.3",
     "reflect-metadata": "^0.1.13",
-    "sqlite3": "^5.1.6",
+    "ts-dotenv": "^0.9.1",
     "ts-node-dev": "^2.0.0",
     "type-graphql": "^2.0.0-beta.3",
     "typeorm": "^0.3.17"

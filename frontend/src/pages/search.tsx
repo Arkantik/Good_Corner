@@ -1,21 +1,22 @@
 import Layout from "@/layouts/Layout";
 import { useRouter } from "next/router";
-import { useEffect, useState } from "react";
-import axios from "axios";
-import { Ad } from "@/interfaces/ads";
 import AdCard from "@/components/AdCard";
+import { useRecentAdsQuery } from "@/graphql/generated/schema";
 
 export default function Search() {
     const router = useRouter();
 
-    const [ads, setAds] = useState<Ad[]>([]);
+    const title = router.query.title as string | undefined;
+    const categoryId = router.query.categoryId as string | undefined;
 
-    useEffect(() => {
-        axios
-            .get<Ad[]>(`http://localhost:4000/ads${window.location.search}`)
-            .then((res) => setAds(res.data))
-            .catch(console.error);
-    }, [router.query.title, router.query.categoryId]);
+    const { data } = useRecentAdsQuery({
+        variables: {
+            title: (title || "") as never,
+            categoryId: (categoryId || "") as never,
+        },
+    });
+
+    const ads = data?.ads || [];
 
     return (
         <Layout pageTitle="recherche - TGC">

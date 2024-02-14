@@ -1,18 +1,24 @@
 import Layout from "@/layouts/Layout";
-import { Category } from "@/components/Header";
-import { FormEvent, useEffect, useState } from "react";
-import axios from "axios";
+import { FormEvent, useState } from "react";
 import { useRouter } from "next/router";
+import axios from "axios";
+import Select from "react-select";
+import { Category } from "@/interfaces/categories";
+import { Tag } from "@/interfaces/tag";
+import { useAllCategoriesQuery, useAllTagsQuery, useCreateAdMutation } from "@/graphql/generated/schema";
 
 export default function NewAd() {
-  const [categories, setCategories] = useState<Category[]>([]);
+  const [createAd] = useCreateAdMutation()
+  const { data: categoriesData } = useAllCategoriesQuery();
+  const { data: tagsData } = useAllTagsQuery();
+  const [selectedCategory, setSelectedCategory] = useState<Category[]>([]);
+  const [selectedTags, setSelectedTags] = useState<Tag[]>([]);
 
-  useEffect(() => {
-    axios
-      .get<Category[]>("http://localhost:4000/categories")
-      .then((res) => setCategories(res.data))
-      .catch(console.error);
-  }, []);
+  const categories = categoriesData?.categories || []
+  const tags = tagsData?.tags || []
+
+  const tagOptions = tags;
+  const categoryOptions = categories;
 
   const router = useRouter();
 
@@ -21,11 +27,12 @@ export default function NewAd() {
     const formData = new FormData(e.target as HTMLFormElement);
     const formJSON: any = Object.fromEntries(formData.entries());
     formJSON.price = parseFloat(formJSON.price);
+    formJSON.category = { id: parseInt(formJSON.category, 10) }
+    formJSON.tags = selectedTags.map((t) => ({ id: t.id }));
 
-    axios
-      .post("http://localhost:4000/ads", formJSON)
+    createAd({ variables: { data: formJSON } })
       .then((res) => {
-        router.push(`/ads/${res.data.id}`);
+        router.push(`/ads/${res.data?.createAd.id}`);
       })
       .catch(console.error);
   };
@@ -128,7 +135,20 @@ export default function NewAd() {
             <label className="label" htmlFor="category">
               <span className="label-text">Catégorie</span>
             </label>
-            <select
+            <Select
+              options={categoryOptions}
+              getOptionValue={(o: any) => o.value || (o.id.toString() as any)}
+              getOptionLabel={(o: any) => o.label || o.name}
+              isMulti
+              name="category"
+              id="category"
+              value={selectedCategory}
+              closeMenuOnSelect={false}
+              onChange={(categories) => {
+                setSelectedCategory(categories as any);
+              }}
+            />
+            {/* <select
               className="select select-bordered"
               id="category"
               name="category"
@@ -139,7 +159,26 @@ export default function NewAd() {
                   {cat.name}
                 </option>
               ))}
-            </select>
+            </select> */}
+          </div>
+
+          <div className="form-control w-full max-w-xs">
+            <label htmlFor="tags" className="label">
+              <span className="label-text">Tags</span>
+            </label>
+            <Select
+              options={tagOptions}
+              getOptionValue={(o: any) => o.value || (o.id.toString() as any)}
+              getOptionLabel={(o: any) => o.label || o.name}
+              isMulti
+              name="tags"
+              id="tags"
+              value={selectedTags}
+              closeMenuOnSelect={false}
+              onChange={(tags) => {
+                setSelectedTags(tags as any);
+              }}
+            />
           </div>
         </div>
 

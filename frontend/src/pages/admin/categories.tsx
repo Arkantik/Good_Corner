@@ -1,23 +1,31 @@
 import CategoryRow from "@/components/admin/CategoryRow";
-import { Category } from "@/interfaces/categories";
 import LayoutAdmin from "@/layouts/LayoutAdmin";
-import axios from "axios";
-import { useEffect, useState } from "react";
+import {
+    AllCategoriesDocument,
+    AllCategoriesQuery,
+    useAllCategoriesQuery,
+    useCreateCategoryMutation,
+    useDeleteCategoryMutation,
+    useUpdateCategoryMutation,
+} from "@/graphql/generated/schema";
+import client from "@/graphql/client";
 
 export default function AdminCategories() {
-    const [categories, setCategories] = useState<Category[]>([]);
+    const { data } = useAllCategoriesQuery();
+    const [createCategory] = useCreateCategoryMutation();
 
-    useEffect(() => {
-        axios
-            .get<Category[]>("http://localhost:4000/categories")
-            .then((res) => setCategories(res.data))
-            .catch(console.error);
-    }, []);
+    const categories = data?.categories || [];
+    const [deleteCategory] = useDeleteCategoryMutation();
 
     const handleDeleteCategory = async (id: number) => {
         try {
-            await axios.delete(`http://localhost:4000/categories/${id}`);
-            setCategories((catList) => catList?.filter((c) => c.id !== id));
+            await deleteCategory({ variables: { categoryId: id } });
+            client.writeQuery<AllCategoriesQuery>({
+                query: AllCategoriesDocument,
+                data: {
+                    categories: categories.filter((category) => category.id !== id),
+                },
+            });
         } catch (e) {
             console.error(e);
         }
@@ -25,63 +33,65 @@ export default function AdminCategories() {
 
     return (
         <LayoutAdmin pageTitle="Gestion des categories">
-            <div className="pt-6">
-                <h2 className="text-2xl mb-6">Gestion des catégories</h2>
+            <form
+                onSubmit={async (e) => {
+                    e.preventDefault();
+                    const form = e.target as HTMLFormElement;
+                    const data = new FormData(form);
+                    const json = Object.fromEntries(data.entries());
 
-                <section className="flex flex-wrap pb-24">
-                    <form
-                        onSubmit={async (e) => {
-                            e.preventDefault();
-                            const form = e.target as HTMLFormElement;
-                            const data = new FormData(form);
-                            const json = Object.fromEntries(data.entries());
+                    try {
+                        const { data } = await createCategory({ variables: { data: json as any } });
+                        // The following condition avoid to refetch but will update the data similar to refetch()
+                        if (data?.createCategory) {
+                            AllCategoriesDocument;
 
-                            try {
-                                const newCat = (
-                                    await axios.post("http://localhost:4000/categories", json)
-                                ).data;
-                                form.reset();
-                                setCategories((oldList) => [newCat, ...oldList]);
-                            } catch (err) {
-                                console.error(err);
-                            }
-                        }}
-                    >
-                        <label htmlFor="name">
-                            Nouvelle Catégorie :{" "}
-                            <input
-                                type="text"
-                                id="name"
-                                name="name"
-                                className="input mr-2"
-                                required
+                            client.writeQuery<AllCategoriesQuery>({
+                                query: AllCategoriesDocument,
+                                data: {
+                                    categories: [data.createCategory, ...categories],
+                                },
+                            });
+                        }
+                        form.reset();
+                    } catch (err) {
+                        console.error(err);
+                    }
+                }}
+            >
+                <label htmlFor="name">
+                    Nouvelle Catégorie :{" "}
+                    <input
+                        type="text"
+                        id="name"
+                        name="name"
+                        className="input mr-2"
+                        required
+                    />
+                </label>
+                <button className="btn">Enregistrer</button>
+            </form>
+
+            {categories?.length !== 0 && (
+                <table className="table mt-4">
+                    <thead>
+                        <tr>
+                            <th>Id</th>
+                            <th>Nom</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {categories?.map((c) => (
+                            <CategoryRow
+                                key={c.id}
+                                handleDeleteCategory={handleDeleteCategory}
+                                category={c}
                             />
-                        </label>
-                        <button className="btn">Enregistrer</button>
-                    </form>
-
-                    {categories?.length !== 0 && (
-                        <table className="table mt-4">
-                            <thead>
-                                <tr>
-                                    <th>Id</th>
-                                    <th>Nom</th>
-                                    <th>Actions</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                {categories?.map((c) => (
-                                    <CategoryRow
-                                        key={c.id}
-                                        handleDeleteCategory={handleDeleteCategory}
-                                        category={c}
-                                    />
-                                ))}
-                            </tbody>
-                        </table>
-                    )}
-                </section>
-            </div>
+                        ))}
+                    </tbody>
+                </table>
+            )}
         </LayoutAdmin>
     );
 }

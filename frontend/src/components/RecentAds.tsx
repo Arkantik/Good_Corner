@@ -1,19 +1,9 @@
-import { useEffect, useState } from "react";
+import { useRecentAdsQuery } from "@/graphql/generated/schema";
 import AdCard from "./AdCard";
-import axios from "axios";
-import { Ad } from "@/interfaces/ads";
 
 export default function RecentAds() {
-  const [ads, setAds] = useState<Ad[]>([]);
-
-  useEffect(() => {
-    axios
-      .get<Ad[]>("http://localhost:4000/ads")
-      .then((res) => {
-        setAds(res.data);
-      })
-      .catch(console.error);
-  }, []);
+  const { data } = useRecentAdsQuery();
+  const ads = data?.ads || []
 
   return (
     <div className="pt-6">

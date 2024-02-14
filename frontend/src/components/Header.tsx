@@ -1,24 +1,14 @@
-import axios from "axios";
-import Link from "next/link";
-import { useRouter } from "next/router";
 import { useEffect, useState } from "react";
+import { useRouter } from "next/router";
+import Link from "next/link";
 import qs from "query-string";
-
-export interface Category {
-  id: number;
-  name: string;
-};
+import { useAllCategoriesQuery } from "@/graphql/generated/schema";
 
 export default function Header() {
-  const [categories, setCategories] = useState<Category[]>([]);
+  const { data: categoriesData } = useAllCategoriesQuery();
   const router = useRouter();
 
-  useEffect(() => {
-    axios
-      .get("http://localhost:4000/categories")
-      .then((res) => setCategories(res.data))
-      .catch(console.error);
-  }, []);
+  const categories = categoriesData?.categories || []
 
   const [search, setSearch] = useState("");
 

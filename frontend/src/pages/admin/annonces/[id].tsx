@@ -1,38 +1,31 @@
-import { Category } from "@/components/Header";
-import { FormEvent, useEffect, useState } from "react";
-import axios from "axios";
+import { FormEvent } from "react";
 import { useRouter } from "next/router";
-import { AdDetails } from "@/interfaces/ads";
 import LayoutAdmin from "@/layouts/LayoutAdmin";
+import { useAllCategoriesQuery, useRecentAdsQuery } from "@/graphql/generated/schema";
 
 export default function EditAd() {
   const router = useRouter();
-  const [categories, setCategories] = useState<Category[]>([]);
-  const [adData, setAdData] = useState<AdDetails>({
-    id: 0,
-    title: '',
-    picture: '',
-    location: '',
-    owner: '',
-    description: '',
-    price: 0,
-    createdAt: ''
-  })
 
-  useEffect(() => {
-    axios
-      .get<Category[]>("http://localhost:4000/categories")
-      .then((res) => setCategories(res.data))
-      .catch(console.error);
+  const { data } = useRecentAdsQuery();
+  const adData = data?.ads
 
-    const adId = router.query.id;
-    if (adId) {
-      axios
-        .get<AdDetails>(`http://localhost:4000/ads/${adId}`)
-        .then((res) => setAdData(res.data))
-        .catch(console.error);
-    }
-  }, [router.query.id]);
+  const { data: dataCategories } = useAllCategoriesQuery();
+  const categories = dataCategories?.categories || []
+
+  // useEffect(() => {
+  //   axios
+  //     .get<Category[]>("http://localhost:4000/categories")
+  //     .then((res) => setCategories(res.data))
+  //     .catch(console.error);
+
+  //   const adId = router.query.id;
+  //   if (adId) {
+  //     axios
+  //       .get<AdDetails>(`http://localhost:4000/ads/${adId}`)
+  //       .then((res) => setAdData(res.data))
+  //       .catch(console.error);
+  //   }
+  // }, [router.query.id]);
 
   const handleEdit = async (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
@@ -40,13 +33,13 @@ export default function EditAd() {
     const formJSON: any = Object.fromEntries(formData.entries());
     formJSON.price = parseFloat(formJSON.price);
 
-    axios
-      .patch(`http://localhost:4000/ads/${adData?.id}`, formJSON)
-      .then((res) => {
-        setAdData(res.data)
-        router.push(`/admin`);
-      })
-      .catch(console.error);
+    // axios
+    //   .patch(`http://localhost:4000/ads/${adData?.id}`, formJSON)
+    //   .then((res) => {
+    //     setAdData(res.data)
+    //     router.push(`/admin`);
+    //   })
+    //   .catch(console.error);
   };
 
   return (
@@ -65,11 +58,11 @@ export default function EditAd() {
               id="title"
               placeholder="Zelda : Ocarina of time"
               className="input input-bordered w-full"
-              value={adData.title}
-              onChange={(e) => {
-                const updatedData = { ...adData!, title: e.target.value };
-                setAdData(updatedData)
-              }}
+              // value={adData?.title}
+              // onChange={(e) => {
+              //   const updatedData = { ...adData!, title: e.target.value };
+              //   setAdData(updatedData)
+              // }}
               required
             />
           </div>
@@ -84,11 +77,11 @@ export default function EditAd() {
               required
               placeholder="https://imageshack.com/zoot.png"
               className="input input-bordered w-full"
-              value={adData.picture}
-              onChange={(e) => {
-                const updatedData = { ...adData!, picture: e.target.value };
-                setAdData(updatedData)
-              }}
+            // value={adData.picture}
+            // onChange={(e) => {
+            //   const updatedData = { ...adData!, picture: e.target.value };
+            //   setAdData(updatedData)
+            // }}
             />
           </div>
         </div>
@@ -104,11 +97,11 @@ export default function EditAd() {
               id="location"
               placeholder="Paris"
               className="input input-bordered w-full"
-              value={adData.location}
-              onChange={(e) => {
-                const updatedData = { ...adData!, location: e.target.value };
-                setAdData(updatedData)
-              }}
+              // value={adData?.location}
+              // onChange={(e) => {
+              //   const updatedData = { ...adData!, location: e.target.value };
+              //   setAdData(updatedData)
+              // }}
               required
             />
           </div>
@@ -123,11 +116,11 @@ export default function EditAd() {
               id="owner"
               placeholder="Link"
               className="input input-bordered w-full"
-              value={adData.owner}
-              onChange={(e) => {
-                const updatedData = { ...adData!, owner: e.target.value };
-                setAdData(updatedData)
-              }}
+              // value={adData.owner}
+              // onChange={(e) => {
+              //   const updatedData = { ...adData!, owner: e.target.value };
+              //   setAdData(updatedData)
+              // }}
               required
             />
           </div>
@@ -143,11 +136,11 @@ export default function EditAd() {
             id="description"
             placeholder="The Legend of Zelda: Ocarina of Time est un jeu vidéo d'action-aventure développé par Nintendo EAD et édité par Nintendo sur Nintendo 64. Ocarina of Time raconte l'histoire de Link, un jeune garçon vivant dans un village perdu dans la forêt, qui parcourt le royaume d'Hyrule pour empêcher Ganondorf d'obtenir la Triforce, une relique sacrée partagée en trois : le courage (Link), la sagesse (Zelda) et la force (Ganondorf)."
             className="textarea textarea-bordered"
-            value={adData.description}
-            onChange={(e) => {
-              const updatedData = { ...adData!, description: e.target.value };
-              setAdData(updatedData)
-            }}
+            // value={adData.description}
+            // onChange={(e) => {
+            //   const updatedData = { ...adData!, description: e.target.value };
+            //   setAdData(updatedData)
+            // }}
             required
           />
         </div>
@@ -164,11 +157,11 @@ export default function EditAd() {
               id="price"
               placeholder="30"
               className="input input-bordered w-full"
-              value={adData.price}
-              onChange={(e) => {
-                const updatedData = { ...adData!, price: parseFloat(e.target.value) };
-                setAdData(updatedData)
-              }}
+              // value={adData.price}
+              // onChange={(e) => {
+              //   const updatedData = { ...adData!, price: parseFloat(e.target.value) };
+              //   setAdData(updatedData)
+              // }}
               required
             />
           </div>
