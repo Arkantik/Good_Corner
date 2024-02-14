@@ -1,6 +1,6 @@
 /* eslint-disable @next/next/no-img-element */
 import Layout from "@/layouts/Layout";
-import { AdDetails, AdDetails as AdDetailsType } from "@/interfaces/ads";
+import { AdDetails } from "@/interfaces/ads";
 import { useRouter } from "next/router";
 import { UserCircleIcon, MapPinIcon } from "@heroicons/react/24/outline";
 import { useAdDetailsQuery } from "@/graphql/generated/schema";
