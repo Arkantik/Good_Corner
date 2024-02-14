@@ -8,7 +8,8 @@
     "dev": "nodemon --legacy-watch src/index.ts",
     "build": "tsc",
     "resetDB": "ts-node-dev src/resetDb.ts",
-    "start:prod": "node build/index.js"
+    "start:prod": "node build/index.js",
+    "test": "jest"
   },
   "keywords": [
     "ads"
@@ -17,11 +18,15 @@
   "license": "ISC",
   "dependencies": {
     "@apollo/server": "^4.10.0",
+    "argon2": "^0.30.3",
     "class-validator": "^0.14.0",
+    "cookie": "^0.6.0",
     "cors": "^2.8.5",
     "express": "^4.18.2",
     "graphql": "^16.8.1",
     "graphql-scalars": "^1.22.4",
+    "graphql-tag": "^2.12.6",
+    "jsonwebtoken": "^9.0.2",
     "nodemon": "^3.0.3",
     "pg": "^8.11.3",
     "reflect-metadata": "^0.1.13",
@@ -31,7 +36,12 @@
     "typeorm": "^0.3.17"
   },
   "devDependencies": {
-    "@types/cors": "^2.8.17",
-    "@types/express": "^4.17.21"
+    "@types/cookie": "^0.6.0",
+    "@types/cors": "^2.8.14",
+    "@types/express": "^4.17.17",
+    "@types/jest": "^29.5.12",
+    "@types/jsonwebtoken": "^9.0.5",
+    "jest": "^29.7.0",
+    "ts-jest": "^29.1.2"
   }
 }
