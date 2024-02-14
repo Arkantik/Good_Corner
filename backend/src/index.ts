@@ -1,241 +1,28 @@
 import "reflect-metadata";
-import express, { Request, Response } from "express";
-import db from "./db";
+import express from "express";
+import http from "http";
 import cors from "cors";
-
 import { ApolloServer } from "@apollo/server";
-import { startStandaloneServer } from "@apollo/server/standalone";
-import { buildSchema } from "type-graphql";
-import AdResolver from "./resolvers/AdResolver";
-import TagResolver from "./resolvers/TagResolver";
-import CategoryResolver from "./resolvers/CategoryResolver";
+import { expressMiddleware } from "@apollo/server/express4";
+import { ApolloServerPluginDrainHttpServer } from "@apollo/server/plugin/drainHttpServer";
+import env from "./env";
+import db from "./db";
+import schemaPromise from "./schema";
 
-buildSchema({ resolvers: [AdResolver, CategoryResolver, TagResolver] }).then(
-  (schema) => {
-    const server = new ApolloServer({ schema });
-    startStandaloneServer(server, {
-      listen: { port: 4000 },
-    }).then(({ url }) => {
-      console.log(` server ready on ${url}`);
-    });
-  }
-);
+const { SERVER_PORT: port, CORS_ALLOWED_ORIGINS: allowedOrigins } = env;
 
-const app = express();
-
-app.use(express.json());
-app.use(cors());
-
-// app.get("/tags", async (req: Request, res: Response) => {
-//   try {
-//     const { name } = req.query;
-//     const tags = await Tag.find({
-//       where: { name: name ? Like(`%${name}%`) : undefined },
-//       order: { id: "desc" },
-//     });
-//     res.send(tags);
-//   } catch (err) {
-//     console.log(err);
-//     res.sendStatus(500);
-//   }
-// });
-
-// app.get("/categories", async (req: Request, res: Response) => {
-//   const { name } = req.query;
-
-//   try {
-//     const categories = await Category.find({
-//       relations: {
-//         ads: true,
-//       },
-//       where: { name: name ? Like(`%${name}%`) : undefined },
-//       order: { id: "desc" },
-//     });
-//     res.send(categories);
-//   } catch (err) {
-//     console.log(err);
-//     res.sendStatus(500);
-//   }
-// });
-
-// app.get("/ads", async (req: Request, res: Response) => {
-//   const { tagIds, categoryId } = req.query;
-//   const title = req.query.title as string | undefined;
-
-//   try {
-//     const ads = await Ad.find({
-//       relations: {
-//         category: true,
-//         tags: true,
-//       },
-//       where: {
-//         tags: {
-//           id:
-//             typeof tagIds === "string" && tagIds.length > 0
-//               ? In(tagIds.split(",").map((t) => parseInt(t, 10)))
-//               : undefined,
-//         },
-//         title: title ? Like(`%${title}%`) : undefined,
-//         category: {
-//           id: categoryId ? parseInt(categoryId as string, 10) : undefined,
-//         },
-//       },
-//     });
-//     res.send(ads);
-//   } catch (err) {
-//     console.log(err);
-//     res.sendStatus(500);
-//   }
-// });
-
-// app.post("/ads", async (req: Request, res: Response) => {
-//   try {
-//     /*
-//       const newAd = new Ad()
-//       newAd.title = req.body.title
-//       newAd.price = req.body.price
-//       ...
-//       const newAdWithId = await newAd.save();
-//     */
-//     const newAd = Ad.create(req.body);
-//     const errors = await validate(newAd);
-//     if (errors.length > 0) return res.status(422).send({ errors });
-//     const newAdWithId = await newAd.save();
-//     res.send(newAdWithId);
-//   } catch (err) {
-//     console.log(err);
-//     res.sendStatus(500);
-//   }
-// });
-
-// app.post("/categories", async (req: Request, res: Response) => {
-//   try {
-//     const newCategory = Category.create(req.body);
-//     const errors = await validate(newCategory);
-//     if (errors.length > 0) return res.status(422).send({ errors });
-//     const newCategoryWithId = await newCategory.save();
-//     res.send(newCategoryWithId);
-//   } catch (err) {
-//     console.log(err);
-//     res.sendStatus(500);
-//   }
-// });
-
-// app.patch("/categories/:id", async (req: Request, res: Response) => {
-//   try {
-//     const catToUpdate = await Category.findOneBy({
-//       id: parseInt(req.params.id, 10),
-//     });
-//     if (!catToUpdate) return res.sendStatus(404);
-//     await Category.merge(catToUpdate, req.body);
-//     const errors = await validate(catToUpdate);
-//     if (errors.length !== 0) return res.status(422).send({ errors });
-
-//     res.send(await catToUpdate.save());
-//   } catch (err) {
-//     console.log(err);
-//     res.sendStatus(500);
-//   }
-// });
-
-// app.delete("/categories/:id", async (req: Request, res: Response) => {
-//   try {
-//     const catToDelete = await Category.findOneBy({
-//       id: parseInt(req.params.id, 10),
-//     });
-//     if (!catToDelete) return res.sendStatus(404);
-//     await catToDelete.remove();
-//     res.sendStatus(204);
-//   } catch (err) {
-//     console.log(err);
-//     res.sendStatus(500);
-//   }
-// });
-
-// app.post("/tags", async (req: Request, res: Response) => {
-//   try {
-//     const newTag = Tag.create(req.body);
-//     const errors = await validate(newTag);
-//     if (errors.length > 0) return res.status(422).send({ errors });
-//     const newTagWithId = await newTag.save();
-//     res.send(newTagWithId);
-//   } catch (err) {
-//     console.log(err);
-//     res.sendStatus(500);
-//   }
-// });
-
-// app.delete("/ads/:id", async (req: Request, res: Response) => {
-//   try {
-//     const adToDelete = await Ad.findOneBy({ id: parseInt(req.params.id, 10) });
-//     if (!adToDelete) return res.sendStatus(404);
-//     await adToDelete.remove();
-//     res.sendStatus(204);
-//   } catch (err) {
-//     console.log(err);
-//     res.sendStatus(500);
-//   }
-// });
-
-// app.delete("/tags/:id", async (req: Request, res: Response) => {
-//   try {
-//     const tagToDelete = await Tag.findOneBy({
-//       id: parseInt(req.params.id, 10),
-//     });
-//     if (!tagToDelete) return res.sendStatus(404);
-//     await tagToDelete.remove();
-//     res.sendStatus(204);
-//   } catch (err) {
-//     console.log(err);
-//     res.sendStatus(500);
-//   }
-// });
-
-// app.get("/ads/:id", async (req: Request, res: Response) => {
-//   try {
-//     const ad = await Ad.findOne({
-//       where: { id: parseInt(req.params.id, 10) },
-//       relations: { category: true, tags: true },
-//     });
-//     if (!ad) return res.sendStatus(404);
-//     res.send(ad);
-//   } catch (err) {
-//     console.log(err);
-//     res.sendStatus(500);
-//   }
-// });
-
-// app.patch("/ads/:id", async (req: Request, res: Response) => {
-//   try {
-//     const adToUpdate = await Ad.findOneBy({ id: parseInt(req.params.id, 10) });
-//     if (!adToUpdate) return res.sendStatus(404);
-//     await Ad.merge(adToUpdate, req.body);
-//     const errors = await validate(adToUpdate);
-//     if (errors.length > 0) return res.status(422).send({ errors });
-//     res.send(await adToUpdate.save());
-//   } catch (err) {
-//     console.log(err);
-//     res.sendStatus(500);
-//   }
-// });
-
-// app.patch("/tags/:id", async (req: Request, res: Response) => {
-//   try {
-//     const tagToUpdate = await Tag.findOneBy({
-//       id: parseInt(req.params.id, 10),
-//     });
-//     if (!tagToUpdate) return res.sendStatus(404);
-//     await Category.merge(tagToUpdate, req.body);
-//     const errors = await validate(tagToUpdate);
-//     if (errors.length !== 0) return res.status(422).send({ errors });
-
-//     res.send(await tagToUpdate.save());
-//   } catch (err) {
-//     console.log(err);
-//     res.sendStatus(500);
-//   }
-// });
-
-app.listen(async () => {
+schemaPromise.then(async (schema) => {
   await db.initialize();
+  const app = express();
+  const httpServer = http.createServer(app);
+  const plugins = [ApolloServerPluginDrainHttpServer({ httpServer })];
+  const server = new ApolloServer({ schema, plugins });
+  await server.start();
+  const corsConfig = { origin: allowedOrigins.split(","), credentials: true };
+  app.use(cors<cors.CorsRequest>(corsConfig));
+  const context = async ({ req, res }: any) => ({ req, res });
+  const expressMW = expressMiddleware(server, { context });
+  app.use(express.json(), expressMW);
+  await new Promise<void>((resolve) => httpServer.listen({ port }, resolve));
+  console.log(`🚀 Server ready at http://localhost:${port}/graphql`);
 });
