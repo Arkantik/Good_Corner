@@ -1,17 +1,29 @@
 services:
-  frontend:
-    build: ./frontend
-    ports:
-      - 3000:3000
-    command: npm run dev
-    volumes:
-      - ./frontend/src/:/app/src/
-    env_file: ./global.env
+  db:
+    image: postgres:15-alpine
+    environment:
+      POSTGRES_PASSWORD: postgres
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
   backend:
-    build: ./backend
+    depends_on:
+      db:
+        condition: service_healthy
+    build: backend
     ports:
       - 4000:4000
-    command: npm start
     volumes:
-      - ./backend/src/:/app/src/
+      - ./backend/src:/app/src/
+    env_file: ./global.env
+
+  frontend:
+    build: frontend
+    ports:
+      - 3000:3000
+    volumes:
+      - ./frontend/src:/app/src/
     env_file: ./global.env
