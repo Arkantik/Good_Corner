@@ -1,16 +1,29 @@
 import { DataSource } from "typeorm";
 import Ad from "./entities/Ad";
-import Category from "./entities/Category";
 import Tag from "./entities/Tag";
+import Category from "./entities/Category";
+import User from "./entities/User";
 import env from "./env";
+const { DB_USER, DB_PASS, DB_NAME, DB_PORT, DB_HOST } = env;
 
-export default new DataSource({
+const db = new DataSource({
   type: "postgres",
-  host: env.DB_HOST,
-  port: env.DB_PORT,
-  username: env.DB_USER,
-  password: env.DB_PASS,
-  database: env.DB_NAME,
-  entities: [Ad, Category, Tag],
+  host: DB_HOST,
+  port: DB_PORT,
+  username: DB_USER,
+  password: DB_PASS,
+  database: DB_NAME,
+  entities: [Ad, Tag, Category, User],
   synchronize: true,
+  logging: env.NODE_ENV !== "test",
 });
+
+export async function clearDB() {
+  const entities = db.entityMetadatas;
+  const tableNames = entities
+    .map((entity) => `"${entity.tableName}"`)
+    .join(", ");
+  await db.query(`TRUNCATE ${tableNames} RESTART IDENTITY CASCADE;`);
+}
+
+export default db;
