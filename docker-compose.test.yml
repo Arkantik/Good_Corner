@@ -18,7 +18,7 @@ services:
       - ./tests/.env
     build: backend
     ports:
-      - 4001:4001
+      - 4000:4000
     volumes:
       - ./backend/src:/app/src
     environment:
