@@ -1,14 +1,16 @@
 import { Resolver, Mutation, Arg, Query, Authorized } from "type-graphql";
+import { GraphQLError } from "graphql";
 import { Like } from "typeorm";
-import Category, {
+import {
+  Category,
   NewCategoryInput,
   UpdateCategoryInput,
 } from "../entities/Category";
-import { notFoundError } from "../utils";
+import { UserRole } from "../entities/User";
 
 @Resolver(Category)
 class CategoriesResolver {
-  @Authorized(["admin"])
+  @Authorized([UserRole.ADMIN])
   @Mutation(() => Category)
   async createCategory(
     @Arg("data", { validate: true }) data: NewCategoryInput
@@ -27,23 +29,23 @@ class CategoriesResolver {
     });
   }
 
-  @Authorized(["admin"])
+  @Authorized([UserRole.ADMIN])
   @Mutation(() => String)
   async deleteCategory(@Arg("categoryId") id: number) {
     const categoryToDelete = await Category.findOneBy({ id });
-    if (!categoryToDelete) throw notFoundError();
+    if (!categoryToDelete) throw new GraphQLError("not found");
     await categoryToDelete.remove();
     return "ok";
   }
 
-  @Authorized(["admin"])
+  @Authorized([UserRole.ADMIN])
   @Mutation(() => Category)
   async updateCategory(
     @Arg("categoryId") id: number,
     @Arg("data", { validate: true }) data: UpdateCategoryInput
   ) {
     const categoryToUpdate = await Category.findOneBy({ id });
-    if (!categoryToUpdate) throw notFoundError();
+    if (!categoryToUpdate) throw new GraphQLError("not found");
     Object.assign(categoryToUpdate, data);
     return await categoryToUpdate.save();
   }

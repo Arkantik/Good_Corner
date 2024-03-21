@@ -1,121 +1,108 @@
-import { argon2id, hash, verify } from "argon2";
-import { IsEmail, IsUrl, Matches, MinLength } from "class-validator";
+import { IsEmail, IsStrongPassword, Length } from "class-validator";
 import { Field, InputType, ObjectType } from "type-graphql";
 import {
   BaseEntity,
+  BeforeInsert,
   Column,
   Entity,
-  ManyToMany,
-  ManyToOne,
+  OneToMany,
   PrimaryGeneratedColumn,
 } from "typeorm";
-import Ad from "./Ad";
+import { hash } from "argon2";
+import { Ad } from "./Ad";
 
-export type Role = "visitor" | "admin";
+export enum UserRole {
+  ADMIN = "admin",
+  USER = "user",
+  VISITOR = "visitor",
+}
 
 @Entity()
 @ObjectType()
-class User extends BaseEntity {
+export class User extends BaseEntity {
+  password: string;
+
+  @BeforeInsert()
+  async hashPassword() {
+    this.hashedPassword = await hash(this.password);
+  }
+
   @Field()
   @PrimaryGeneratedColumn()
   id: number;
 
   @Field()
-  @Column({ nullable: true })
+  @Column({ unique: true })
   email: string;
-
-  @Column({ nullable: true })
-  hashedPassword?: string;
-
-  @Field()
-  @Column({ enum: ["visitor", "admin"], default: "visitor" })
-  role: Role;
-
-  @Field()
-  @Column({
-    default:
-      "https://static-00.iconduck.com/assets.00/user-avatar-icon-512x512-vufpcmdn.png",
-  })
-  avatar: string;
 
   @Field()
   @Column()
   nickname: string;
 
-  @ManyToOne(() => Ad, (ad) => ad.owner)
+  @Column()
+  hashedPassword: string;
+
+  @Column({
+    default:
+      "https://icons.veryicon.com/png/o/miscellaneous/standard/avatar-15.png",
+  })
+  @Field()
+  avatar: string;
+
+  @Field(() => [Ad])
+  @OneToMany(() => Ad, (ad) => ad.owner)
   ads: Ad[];
+
+  @Field()
+  @Column({ enum: UserRole, default: UserRole.VISITOR })
+  role: UserRole;
+
+  @Column({ nullable: true, type: "varchar", unique: true })
+  emailConfirmationToken?: string | null;
+
+  @Column({ default: false })
+  emailVerified: boolean;
 }
 
 @InputType()
-export class UserInput {
-  @Field()
+export class NewUserInput {
   @IsEmail()
+  @Field()
   email: string;
 
+  @Length(2, 30)
   @Field()
-  @MinLength(8)
-  @Matches(/(?=.*\d)(?=.*[a-z])(?=.*[A-Z]).{8,}/)
-  password: string;
-
-  @Field()
-  @MinLength(3)
   nickname: string;
-}
 
-@InputType()
-export class UserLoginInput {
-  @Field()
-  @IsEmail()
-  email: string;
+  @Length(2, 30)
+  @Field({ nullable: true })
+  avatar?: string;
 
   @Field()
-  @MinLength(8)
-  @Matches(/(?=.*\d)(?=.*[a-z])(?=.*[A-Z]).{8,}/)
+  @IsStrongPassword()
   password: string;
 }
 
 @InputType()
 export class UpdateUserInput {
-  @Field({ nullable: true })
-  @IsEmail()
-  email?: string;
-
-  @Field({ nullable: true })
-  @MinLength(8)
-  @Matches(/(?=.*\d)(?=.*[a-z])(?=.*[A-Z]).{8,}/)
-  password?: string;
-
-  @Field()
-  @MinLength(3)
+  @Length(2, 30)
   @Field({ nullable: true })
   nickname?: string;
 
+  @Length(2, 255)
   @Field({ nullable: true })
-  @MinLength(3)
-  @IsUrl()
   avatar?: string;
 }
 
-// https://cheatsheetseries.owasp.org/cheatsheets/Password_Storage_Cheat_Sheet.html
-const hashingOptions = {
-  memoryCost: 2 ** 16,
-  timeCost: 5,
-  type: argon2id,
-};
+@InputType()
+export class LoginInput {
+  @IsEmail()
+  @Field()
+  email: string;
 
-export const hashPassword = async (plainPassword: string): Promise<string> =>
-  await hash(plainPassword, hashingOptions);
-
-export const verifyPassword = async (
-  plainPassword: string,
-  hashedPassword: string
-): Promise<boolean> =>
-  await verify(hashedPassword, plainPassword, hashingOptions);
-
-export const getSafeAttributes = (user: User): User =>
-  ({
-    ...user,
-    hashedPassword: undefined,
-  } as User);
+  @Field()
+  @IsStrongPassword()
+  password: string;
+}
 
 export default User;

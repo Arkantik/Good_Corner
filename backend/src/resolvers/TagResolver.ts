@@ -1,11 +1,12 @@
 import { Resolver, Mutation, Arg, Query, Authorized } from "type-graphql";
-import Tag, { NewTagInput, UpdateTagInput } from "../entities/Tag";
+import { GraphQLError } from "graphql";
+import { Tag, NewTagInput, UpdateTagInput } from "../entities/Tag";
 import { Like } from "typeorm";
-import { notFoundError } from "../utils";
+import { UserRole } from "../entities/User";
 
 @Resolver(Tag)
 class TagsResolver {
-  @Authorized(["admin"])
+  @Authorized([UserRole.ADMIN])
   @Mutation(() => Tag)
   async createTag(@Arg("data", { validate: true }) data: NewTagInput) {
     const newTag = new Tag();
@@ -21,23 +22,23 @@ class TagsResolver {
     });
   }
 
-  @Authorized(["admin"])
+  @Authorized([UserRole.ADMIN])
   @Mutation(() => String)
   async deleteTag(@Arg("tagId") id: number) {
     const tagToDelete = await Tag.findOneBy({ id });
-    if (!tagToDelete) throw notFoundError();
+    if (!tagToDelete) throw new GraphQLError("not found");
     await tagToDelete.remove();
     return "ok";
   }
 
-  @Authorized(["admin"])
+  @Authorized([UserRole.ADMIN])
   @Mutation(() => Tag)
   async updateTag(
     @Arg("tagId") id: number,
     @Arg("data", { validate: true }) data: UpdateTagInput
   ) {
     const tagToUpdate = await Tag.findOneBy({ id });
-    if (!tagToUpdate) throw notFoundError();
+    if (!tagToUpdate) throw new GraphQLError("not found");
     Object.assign(tagToUpdate, data);
     return await tagToUpdate.save();
   }

@@ -4,17 +4,14 @@ import {
   Arg,
   Mutation,
   Int,
-  Authorized,
   Ctx,
+  Authorized,
 } from "type-graphql";
 import { Ad, NewAdInput, UpdateAdInput } from "../entities/Ad";
+import { GraphQLError } from "graphql";
 import { ILike, In } from "typeorm";
-import { ContextType } from "../types";
-import {
-  notFoundError,
-  unauthaurizedError,
-  unauthenticatedError,
-} from "../utils";
+import { Context } from "../utils";
+import { UserRole } from "../entities/User";
 
 @Resolver(Ad)
 class AdsResolver {
@@ -22,7 +19,6 @@ class AdsResolver {
   async ads(
     @Arg("tagsId", { nullable: true }) tagIds?: string,
     @Arg("categoryId", () => Int, { nullable: true }) categoryId?: number,
-    @Arg("ownerId", () => Int, { nullable: true }) ownerId?: number,
     @Arg("title", { nullable: true }) title?: string
   ) {
     return Ad.find({
@@ -38,9 +34,6 @@ class AdsResolver {
         category: {
           id: categoryId,
         },
-        owner: {
-          id: ownerId,
-        },
       },
     });
   }
@@ -51,7 +44,7 @@ class AdsResolver {
       where: { id },
       relations: { category: true, tags: true, owner: true },
     });
-    if (!ad) throw notFoundError();
+    if (!ad) throw new GraphQLError("not found");
     return ad;
   }
 
@@ -59,16 +52,16 @@ class AdsResolver {
   @Mutation(() => Ad)
   async createAd(
     @Arg("data", { validate: true }) data: NewAdInput,
-    @Ctx() { currentUser }: ContextType
+    @Ctx() ctx: Context
   ) {
-    if (typeof currentUser === "undefined") throw unauthenticatedError();
+    if (!ctx.currentUser) throw new GraphQLError("Not authenticated");
     const newAd = new Ad();
     Object.assign(newAd, data);
-    newAd.owner = { id: currentUser?.id } as any;
+    newAd.owner = ctx.currentUser;
     const { id } = await newAd.save();
     return Ad.findOne({
       where: { id },
-      relations: { category: true, tags: true },
+      relations: { category: true, tags: true, owner: true },
     });
   }
 
@@ -77,32 +70,40 @@ class AdsResolver {
   async updateAd(
     @Arg("adId") id: number,
     @Arg("data", { validate: true }) data: UpdateAdInput,
-    @Ctx() { currentUser }: ContextType
+    @Ctx() ctx: Context
   ) {
-    if (typeof currentUser === "undefined") throw unauthenticatedError();
+    if (!ctx.currentUser) throw new GraphQLError("Not authenticated");
     const adToUpdate = await Ad.findOne({
       where: { id },
       relations: { owner: true },
     });
-    if (!adToUpdate) throw notFoundError();
-    if (currentUser.role !== "admin" && currentUser.id !== adToUpdate.owner.id)
-      throw unauthaurizedError();
+    if (!adToUpdate) throw new GraphQLError("not found");
+
+    if (
+      ctx.currentUser.role !== UserRole.ADMIN &&
+      adToUpdate.owner.id !== ctx.currentUser.id
+    )
+      throw new GraphQLError("Not authorized");
     await Object.assign(adToUpdate, data);
+
     await adToUpdate.save();
     return Ad.findOne({
       where: { id },
-      relations: { category: true, tags: true },
+      relations: { category: true, tags: true, owner: true },
     });
   }
 
   @Authorized()
   @Mutation(() => String)
-  async deleteAd(@Arg("adId") id: number, @Ctx() { currentUser }: ContextType) {
-    if (typeof currentUser === "undefined") throw unauthenticatedError();
+  async deleteAd(@Arg("adId") id: number, @Ctx() ctx: Context) {
+    if (!ctx.currentUser) throw new GraphQLError("Not authenticated");
     const ad = await Ad.findOne({ where: { id }, relations: { owner: true } });
-    if (!ad) throw notFoundError();
-    if (currentUser.role !== "admin" && currentUser.id !== ad.owner.id)
-      throw unauthaurizedError();
+    if (!ad) throw new GraphQLError("not found");
+    if (
+      ctx.currentUser.role !== UserRole.ADMIN &&
+      ad.owner.id !== ctx.currentUser.id
+    )
+      throw new GraphQLError("Not authorized");
     await ad.remove();
     return "deleted";
   }
