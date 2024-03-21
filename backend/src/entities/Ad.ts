@@ -30,11 +30,11 @@ export class Ad extends BaseEntity {
   @Field()
   description: string;
 
-  @Field()
-  @ManyToOne(() => User, (c) => c.ads, {
+  @ManyToOne(() => User, (u) => u.ads, {
     cascade: true,
     onDelete: "CASCADE",
   })
+  @Field()
   owner: User;
 
   @Column({ type: "float" })

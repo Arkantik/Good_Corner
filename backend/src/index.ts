@@ -1,28 +1,38 @@
 import "reflect-metadata";
 import express from "express";
-import http from "http";
 import cors from "cors";
+import http from "http";
+import { db } from "./db";
 import { ApolloServer } from "@apollo/server";
 import { expressMiddleware } from "@apollo/server/express4";
 import { ApolloServerPluginDrainHttpServer } from "@apollo/server/plugin/drainHttpServer";
+import schemaIsBuilt from "./schema";
 import env from "./env";
-import db from "./db";
-import schemaPromise from "./schema";
+import { Context } from "./utils";
 
-const { SERVER_PORT: port, CORS_ALLOWED_ORIGINS: allowedOrigins } = env;
+const app = express();
+const httpServer = http.createServer(app);
 
-schemaPromise.then(async (schema) => {
+const { SERVER_PORT: port } = env;
+
+schemaIsBuilt.then(async (schema) => {
   await db.initialize();
-  const app = express();
-  const httpServer = http.createServer(app);
-  const plugins = [ApolloServerPluginDrainHttpServer({ httpServer })];
-  const server = new ApolloServer({ schema, plugins });
+  const server = new ApolloServer<Context>({
+    schema,
+    plugins: [ApolloServerPluginDrainHttpServer({ httpServer })],
+  });
   await server.start();
-  const corsConfig = { origin: allowedOrigins.split(","), credentials: true };
-  app.use(cors<cors.CorsRequest>(corsConfig));
-  const context = async ({ req, res }: any) => ({ req, res });
-  const expressMW = expressMiddleware(server, { context });
-  app.use(express.json(), expressMW);
+  app.use(
+    "/",
+    cors<cors.CorsRequest>({
+      credentials: true,
+      origin: env.CORS_ALLOWED_ORIGINS.split(","),
+    }),
+    express.json(),
+    expressMiddleware(server, {
+      context: async ({ req, res }) => ({ req, res }),
+    })
+  );
   await new Promise<void>((resolve) => httpServer.listen({ port }, resolve));
-  console.log(`🚀 Server ready at http://localhost:${port}/graphql`);
+  console.log(`🚀 Server ready at http://localhost:4000/`);
 });

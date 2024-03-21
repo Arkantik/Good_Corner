@@ -1,25 +1,27 @@
-import jwt from "jsonwebtoken";
+import { AuthChecker } from "type-graphql";
+import { Context } from "./utils";
 import cookie from "cookie";
-import { ContextType, JWTPayload } from "./types";
-import env from "./env";
-import db from "./db";
+import jwt from "jsonwebtoken";
+import { env } from "process";
 import User from "./entities/User";
-const { JWT_PRIVATE_KEY } = env;
 
-export async function authChecker(
-  { context }: { context: ContextType },
+export const authChecker: AuthChecker<Context> = async (
+  { context },
   roles: string[] = []
-) {
-  const { req } = context;
-  const tokenInAuthHeaders = req.headers.authorization?.split(" ")[1];
-  const tokenInCookie = cookie.parse(req.headers.cookie ?? "").token;
+) => {
+  const { headers } = context.req;
+  const tokenInCookie = cookie.parse(headers.cookie ?? "").token;
+  const tokenInAuthHeaders = headers.authorization?.split(" ")[1];
+
   const token = tokenInAuthHeaders ?? tokenInCookie;
   if (typeof token !== "string") return false;
-  const decoded = jwt.verify(token, JWT_PRIVATE_KEY) as JWTPayload;
-  if (typeof decoded !== "object") return false;
-  const id = decoded.userId;
-  const currentUser = await db.getRepository(User).findOneBy({ id });
+
+  const decoded = (await jwt.verify(token, env.JWT_PRIVATE_KEY!)) as any;
+  if (!decoded?.userId) return false;
+
+  const currentUser = await User.findOneByOrFail({ id: decoded?.userId });
   if (currentUser === null) return false;
+
   context.currentUser = currentUser;
   return roles.length === 0 || roles.includes(currentUser.role);
-}
+};

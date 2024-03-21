@@ -1,92 +1,101 @@
 import { Arg, Authorized, Ctx, Mutation, Query, Resolver } from "type-graphql";
-import datasource from "../db";
-import User, {
-  getSafeAttributes,
-  hashPassword,
+import {
+  User,
+  NewUserInput,
+  LoginInput,
   UpdateUserInput,
-  UserInput,
-  UserLoginInput,
-  verifyPassword,
 } from "../entities/User";
-import { ContextType } from "../types";
+import { GraphQLError } from "graphql";
+import { verify } from "argon2";
 import jwt from "jsonwebtoken";
 import env from "../env";
-import { unauthenticatedError } from "../utils";
+import { Context } from "../utils";
+import mailer from "../mailer";
+import crypto from "crypto";
 
-@Resolver(User)
+@Resolver()
 class UserResolver {
   @Mutation(() => User)
-  async createUser(@Arg("data") data: UserInput): Promise<User> {
-    const exisitingUser = await User.findOne({ where: { email: data.email } });
-    if (exisitingUser !== null) throw new Error("EMAIL_ALREADY_EXISTS");
-    const hashedPassword = await hashPassword(data.password);
-    return await datasource
-      .getRepository(User)
-      .save({ ...data, hashedPassword });
+  async createUser(@Arg("data", { validate: true }) data: NewUserInput) {
+    const existingUser = await User.findOneBy({ email: data.email });
+    if (existingUser !== null) throw new GraphQLError("EMAIL_ALREADY_TAKEN");
+
+    const newUser = new User();
+    Object.assign(newUser, data);
+
+    const token = crypto.randomBytes(32).toString("hex");
+
+    newUser.emailConfirmationToken = token;
+
+    const res = await mailer.sendMail({
+      from: env.EMAIL_FROM,
+      to: newUser.email,
+      subject: "Bienvenue sur The Good Corner",
+      text: "Bienvenue parmi nous ${newUser.nickname} ! Pour confirmer votre email, cliquez sur ce lien : ${env.FRONTEND_URL}/confirmEmail?token=${token}",
+    });
+
+    const newUserWithId = await newUser.save();
+    return newUserWithId;
   }
 
   @Mutation(() => String)
-  async login(
-    @Arg("data") { password, email }: UserLoginInput,
-    @Ctx() ctx: ContextType
-  ): Promise<string> {
-    const user = await datasource
-      .getRepository(User)
-      .findOne({ where: { email } });
+  async login(@Arg("data") data: LoginInput, @Ctx() ctx: Context) {
+    const existingUser = await User.findOneBy({ email: data.email });
+    if (existingUser === null) throw new GraphQLError("INVALID_CREDENTIALS");
+    const passwordValid = await verify(
+      existingUser.hashedPassword,
+      data.password
+    );
+    if (!passwordValid) throw new GraphQLError("INVALID_CREDENTIALS");
+    if (!existingUser.emailVerified)
+      throw new GraphQLError("EMAIL_NOT_VERIFIED");
 
-    if (
-      user === null ||
-      typeof user.hashedPassword !== "string" ||
-      !(await verifyPassword(password, user.hashedPassword))
-    )
-      throw new Error("invalid credentials");
+    const token = jwt.sign({ userId: existingUser.id }, env.JWT_PRIVATE_KEY);
 
-    // https://www.npmjs.com/package/jsonwebtoken
-    const token = jwt.sign({ userId: user.id }, env.JWT_PRIVATE_KEY);
-
-    // https://stackoverflow.com/a/40135050
-    ctx.res.cookie("token", token, {
-      secure: env.NODE_ENV === "production",
-      httpOnly: true,
-    });
-
+    ctx.res.cookie("token", token, { httpOnly: true });
     return token;
   }
 
   @Mutation(() => String)
-  async logout(@Ctx() ctx: ContextType): Promise<string> {
+  async logout(@Ctx() ctx: Context) {
     ctx.res.clearCookie("token");
-    return "OK";
-  }
-
-  @Authorized()
-  @Query(() => User)
-  async profile(@Ctx() ctx: ContextType): Promise<User> {
-    return getSafeAttributes(ctx.currentUser as User);
+    return "LOGGED_OUT";
   }
 
   @Authorized()
   @Mutation(() => User)
   async updateProfile(
-    @Arg("data") data: UpdateUserInput,
-    @Ctx() { currentUser }: ContextType
-  ): Promise<User> {
-    if (typeof currentUser === "undefined") throw unauthenticatedError();
+    @Ctx() ctx: Context,
+    @Arg("data", { validate: true }) data: UpdateUserInput
+  ) {
+    if (!ctx.currentUser)
+      throw new GraphQLError("you need to be logged in to updateyour profile");
 
-    const exisitingUser = await User.findOneBy({ email: data.email || "" });
+    if (data.avatar) ctx.currentUser.avatar = data.avatar;
+    if (data.nickname) ctx.currentUser.nickname = data.nickname;
 
-    if (exisitingUser !== null && exisitingUser.email !== currentUser.email)
-      throw new Error("EMAIL_ALREADY_EXISTS");
+    return ctx.currentUser.save();
+  }
 
-    if (data.email) currentUser.email = data.email;
-    if (data.password)
-      currentUser.hashedPassword = data.password
-        ? await hashPassword(data.password)
-        : undefined;
-    if (data.avatar) currentUser.avatar = data.avatar;
-    if (data.nickname) currentUser.nickname = data.nickname;
+  @Mutation(() => String)
+  async confirmEmail(@Arg("token") token: string) {
+    const user = await User.findOneBy({ emailConfirmationToken: token });
+    if (user === null) throw new GraphQLError("INVALID_TOKEN");
+    user.emailVerified = true;
+    user.emailConfirmationToken = null;
 
-    return await currentUser.save();
+    user.save();
+    return "EMAIL_CONFIRMED";
+  }
+
+  @Authorized()
+  @Query(() => User)
+  async profile(@Ctx() ctx: Context) {
+    if (!ctx.currentUser) throw new GraphQLError("NOT_AUTHENTICATED");
+    return User.findOneOrFail({
+      where: { id: ctx.currentUser?.id },
+      relations: { ads: true },
+    });
   }
 }
 
