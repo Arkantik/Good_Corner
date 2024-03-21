@@ -1,0 +1,15 @@
+query Profile {
+  profile {
+    id
+    email
+    avatar
+    nickname
+    role
+    ads {
+      id
+      title
+      price
+      picture
+    }
+  }
+}

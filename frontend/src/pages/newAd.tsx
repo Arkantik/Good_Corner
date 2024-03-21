@@ -85,20 +85,6 @@ export default function NewAd() {
               className="input input-bordered w-full"
             />
           </div>
-
-          <div className="form-control w-full">
-            <label className="label" htmlFor="owner">
-              <span className="label-text">Auteur</span>
-            </label>
-            <input
-              type="text"
-              name="owner"
-              id="owner"
-              required
-              placeholder="Link"
-              className="input input-bordered w-full"
-            />
-          </div>
         </div>
 
         <div className="form-control">
